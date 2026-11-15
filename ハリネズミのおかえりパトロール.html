@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>ハリネズミのおかえりパトロール</title>
+  <style>
+    :root {
+      --bg1: #fff6d9;
+      --bg2: #e7f7cf;
+      --accent: #ff8f7a;
+      --accent2: #7ac6ff;
+      --ink: #5b4332;
+      --panel: rgba(255, 250, 240, 0.92);
+      --shadow: rgba(91, 67, 50, 0.15);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,255,255,0.75), transparent 30%),
+        linear-gradient(180deg, #d9f7ff 0%, #f9ffd9 32%, #fff4d6 100%);
+      color: var(--ink);
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .hud {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      top: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 2px solid rgba(255,255,255,0.85);
+      border-radius: 18px;
+      box-shadow: 0 10px 25px var(--shadow);
+      padding: 10px 14px;
+      min-width: 0;
+      backdrop-filter: blur(6px);
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 90px;
+    }
+
+    .stat .label {
+      font-size: 12px;
+      opacity: 0.72;
+    }
+
+    .stat .value {
+      font-weight: 800;
+      font-size: 22px;
+      line-height: 1.05;
+      margin-top: 2px;
+    }
+
+    .headline {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      pointer-events: none;
+    }
+
+    .headline .title {
+      font-size: 15px;
+      font-weight: 800;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .bottomUi {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: max(10px, env(safe-area-inset-bottom));
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 10px 14px;
+      z-index: 6;
+      pointer-events: none;
+    }
+
+    .controlsHint {
+      pointer-events: none;
+      width: min(54vw, 380px);
+      padding: 9px 12px;
+      font-size: 11px;
+      line-height: 1.35;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .controlsHint strong {
+      white-space: nowrap;
+    }
+
+    .hintDot {
+      width: 10px;
+      height: 10px;
+      flex: 0 0 10px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ffa784, #ff7f6a);
+      box-shadow: 0 0 0 3px rgba(255, 167, 132, 0.18);
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+      cursor: pointer;
+      transition: transform 0.08s ease, filter 0.15s ease;
+    }
+
+    button:active { transform: scale(0.97); }
+
+    #callBtn {
+      padding: 13px 15px;
+      min-width: 102px;
+      background: linear-gradient(180deg, #ff9d87, #ff7b68);
+      font-size: 15px;
+    }
+
+    #restartBtn {
+      padding: 13px 15px;
+      min-width: 98px;
+      background: linear-gradient(180deg, #8fd9ff, #63b7ff);
+      font-size: 15px;
+    }
+
+    #pauseBtn {
+      padding: 13px 15px;
+      min-width: 96px;
+      background: linear-gradient(180deg, #bda6ff, #8d75f0);
+      font-size: 15px;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 10;
+      background: rgba(67, 45, 29, 0.22);
+    }
+
+    .card {
+      width: min(94vw, 520px);
+      background: rgba(255, 251, 245, 0.96);
+      border-radius: 28px;
+      padding: 24px 22px 22px;
+      box-shadow: 0 22px 44px rgba(40, 22, 10, 0.18);
+      border: 3px solid rgba(255,255,255,0.9);
+      text-align: center;
+    }
+
+    .card h1, .card h2 {
+      margin: 0 0 10px;
+      line-height: 1.2;
+    }
+
+    .card h1 {
+      font-size: 28px;
+    }
+
+    .card h2 {
+      font-size: 26px;
+    }
+
+    .card p {
+      margin: 10px 0;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .badgeRow {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 14px 0 16px;
+    }
+
+    .badge {
+      background: #fff;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      box-shadow: inset 0 0 0 2px rgba(255, 189, 153, 0.5);
+    }
+
+    .big {
+      width: min(90vw, 300px);
+      padding: 16px 18px;
+      margin-top: 10px;
+      font-size: 18px;
+      background: linear-gradient(180deg, #ffa784, #ff7f6a);
+    }
+
+    .small {
+      margin-top: 10px;
+      background: transparent;
+      color: var(--ink);
+      box-shadow: none;
+      text-decoration: underline;
+      padding: 6px 10px;
+    }
+
+
+    .topTabs {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      top: 86px;
+      display: flex;
+      gap: 8px;
+      z-index: 7;
+      pointer-events: auto;
+    }
+
+    .tabBtn {
+      padding: 10px 14px;
+      min-width: 96px;
+      color: var(--ink);
+      background: rgba(255, 251, 245, 0.96);
+      box-shadow: 0 10px 22px rgba(40, 22, 10, 0.12);
+      border: 2px solid rgba(255,255,255,0.9);
+    }
+
+    .tabBtn.active {
+      color: #fff;
+      background: linear-gradient(180deg, #ffa784, #ff7f6a);
+    }
+
+    .infoScreen {
+      position: absolute;
+      inset: 0;
+      z-index: 8;
+      padding: 136px 12px max(96px, calc(env(safe-area-inset-bottom) + 92px)) 12px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background: rgba(255, 247, 235, 0.82);
+      backdrop-filter: blur(6px);
+    }
+
+    .infoWrap {
+      width: min(100%, 920px);
+      margin: 0 auto;
+      display: grid;
+      gap: 12px;
+    }
+
+    .infoTopBar {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .infoBackBtn {
+      padding: 10px 14px;
+      min-width: 148px;
+      color: var(--ink);
+      background: rgba(255, 251, 245, 0.98);
+      box-shadow: 0 10px 22px rgba(40, 22, 10, 0.12);
+      border: 2px solid rgba(255,255,255,0.9);
+    }
+
+    .infoPanel {
+      background: rgba(255, 251, 245, 0.96);
+      border: 2px solid rgba(255,255,255,0.9);
+      border-radius: 24px;
+      box-shadow: 0 16px 34px rgba(40, 22, 10, 0.12);
+      padding: 16px;
+    }
+
+    .infoTitle {
+      margin: 0 0 10px;
+      font-size: 22px;
+      line-height: 1.25;
+    }
+
+    .infoLead {
+      margin: 0;
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    .subTabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 14px 0 0;
+    }
+
+    .subTabBtn {
+      padding: 10px 12px;
+      color: var(--ink);
+      background: #fff;
+      box-shadow: inset 0 0 0 2px rgba(255, 189, 153, 0.5);
+    }
+
+    .subTabBtn.active {
+      color: #fff;
+      background: linear-gradient(180deg, #ffa784, #ff7f6a);
+      box-shadow: 0 10px 22px rgba(255, 127, 106, 0.2);
+    }
+
+    .infoSection.hiddenSection {
+      display: none;
+    }
+
+    .infoSection h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .infoSection p {
+      margin: 0;
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    .characterGrid,
+    .placeGrid {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .characterGrid {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .placeGrid {
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    }
+
+    .miniCard {
+      background: #fff;
+      border-radius: 18px;
+      padding: 12px;
+      box-shadow: inset 0 0 0 2px rgba(255, 189, 153, 0.35);
+    }
+
+    .miniCard h4 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      line-height: 1.3;
+    }
+
+    .miniCard p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+
+    .familyIconRow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+      align-items: flex-start;
+    }
+
+    .familyBadge {
+      min-width: 70px;
+      text-align: center;
+    }
+
+    .familyBadge svg,
+    .miniIconBubble svg {
+      display: block;
+      width: 56px;
+      height: 44px;
+      margin: 0 auto 6px;
+      overflow: visible;
+    }
+
+    .familyBadge span {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .familyBadge small {
+      display: block;
+      margin-top: 2px;
+      font-size: 11px;
+      opacity: 0.72;
+    }
+
+    .miniIconBubble {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 10px 12px;
+      background: rgba(255, 244, 236, 0.9);
+      border-radius: 16px;
+      box-shadow: inset 0 0 0 2px rgba(255, 189, 153, 0.26);
+    }
+
+    .miniIconBubble .label {
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .babyHeading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .babyHeading svg {
+      width: 34px;
+      height: 28px;
+      flex: 0 0 34px;
+      overflow: visible;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 520px) {
+      .hud { gap: 8px; }
+      .panel { padding: 9px 12px; border-radius: 16px; }
+      .stat { min-width: 76px; }
+      .stat .value { font-size: 20px; }
+      .headline .title { font-size: 14px; }
+      .bottomUi {
+        gap: 8px;
+        align-items: flex-end;
+      }
+      .controlsHint {
+        width: min(50vw, 340px);
+        font-size: 10px;
+        padding: 8px 10px;
+      }
+      #callBtn, #restartBtn, #pauseBtn {
+        min-width: 84px;
+        padding: 12px 12px;
+        font-size: 14px;
+      }
+      .infoBackBtn {
+        min-width: 132px;
+        padding: 9px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="game"></canvas>
+
+    <div class="topTabs">
+      <button id="playTabBtn" class="tabBtn active" type="button">プレイ</button>
+      <button id="infoTabBtn" class="tabBtn" type="button">せつめい</button>
+    </div>
+
+    <div class="infoScreen hidden" id="infoScreen">
+      <div class="infoWrap">
+        <div class="infoTopBar">
+          <button id="infoBackBtn" class="infoBackBtn" type="button">← ゲームにもどる</button>
+        </div>
+        <div class="infoPanel">
+          <h2 class="infoTitle">ハリネズミのおかえりパトロール</h2>
+          <p class="infoLead">
+            夕暮れどき、赤い屋根のおうちのまわりには、ころころと小さな足音がひびきます。<br />
+            6匹の子ハリネズミたちは、それぞれ気になる遊び場へ、よちよち冒険のまっさいちゅう。<br />
+            お母さんハリネズミは、やさしく何度も呼びかけながら、みんなを晩ごはんの待つおうちへ連れて帰ります。
+          </p>
+          <div class="familyIconRow">
+            <div class="familyBadge"><svg viewBox="0 0 84 58" aria-hidden="true"><polygon points="8,34 16,18 24,34 32,14 40,34 48,16 56,34 64,18 72,36" fill="#8c623f"/><ellipse cx="37" cy="34" rx="26" ry="17" fill="#8c623f"/><ellipse cx="51" cy="36" rx="18" ry="13" fill="#f4dfc7"/><circle cx="64" cy="37" r="2.8" fill="#3f2c1f"/><circle cx="47" cy="31" r="2.1" fill="#3f2c1f"/><circle cx="54" cy="32" r="2.1" fill="#3f2c1f"/><path d="M46 42 Q52 46 58 42" stroke="#6b3b2d" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="23" cy="18" r="4.4" fill="#f48a8f"/><circle cx="33" cy="14" r="4.4" fill="#f48a8f"/></svg><span>おかあさん</span><small>お迎え役</small></div>
+            <div class="familyBadge"><svg viewBox="0 0 84 58" aria-hidden="true"><polygon points="10,36 17,22 24,36 31,18 38,36 45,20 52,36 59,22 66,38" fill="#9b7250"/><ellipse cx="38" cy="36" rx="22" ry="14" fill="#9b7250"/><ellipse cx="50" cy="38" rx="15" ry="11" fill="#f4dfc7"/><circle cx="61" cy="39" r="2.5" fill="#3f2c1f"/><circle cx="47" cy="33" r="1.9" fill="#3f2c1f"/><circle cx="53" cy="34" r="1.9" fill="#3f2c1f"/><path d="M46 43 Q50 46 55 43" stroke="#6b3b2d" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>ぽこ</span><small>まっすぐ</small></div>
+            <div class="familyBadge"><svg viewBox="0 0 84 58" aria-hidden="true"><polygon points="10,36 17,22 24,36 31,18 38,36 45,20 52,36 59,22 66,38" fill="#8e6748"/><ellipse cx="38" cy="36" rx="22" ry="14" fill="#8e6748"/><ellipse cx="50" cy="38" rx="15" ry="11" fill="#f4dfc7"/><circle cx="61" cy="39" r="2.5" fill="#3f2c1f"/><circle cx="47" cy="33" r="1.9" fill="#3f2c1f"/><circle cx="53" cy="34" r="1.9" fill="#3f2c1f"/><path d="M46 43 Q50 46 55 43" stroke="#6b3b2d" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>ちく</span><small>しんちょう</small></div>
+            <div class="familyBadge"><svg viewBox="0 0 84 58" aria-hidden="true"><polygon points="10,36 17,22 24,36 31,18 38,36 45,20 52,36 59,22 66,38" fill="#a77b56"/><ellipse cx="38" cy="36" rx="22" ry="14" fill="#a77b56"/><ellipse cx="50" cy="38" rx="15" ry="11" fill="#f4dfc7"/><circle cx="61" cy="39" r="2.5" fill="#3f2c1f"/><circle cx="47" cy="33" r="1.9" fill="#3f2c1f"/><circle cx="53" cy="34" r="1.9" fill="#3f2c1f"/><path d="M46 43 Q50 46 55 43" stroke="#6b3b2d" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>ころ</span><small>のんびり</small></div>
+            <div class="familyBadge"><svg viewBox="0 0 84 58" aria-hidden="true"><polygon points="10,36 17,22 24,36 31,18 38,36 45,20 52,36 59,22 66,38" fill="#946746"/><ellipse cx="38" cy="36" rx="22" ry="14" fill="#946746"/><ellipse cx="50" cy="38" rx="15" ry="11" fill="#f4dfc7"/><circle cx="61" cy="39" r="2.5" fill="#3f2c1f"/><circle cx="47" cy="33" r="1.9" fill="#3f2c1f"/><circle cx="53" cy="34" r="1.9" fill="#3f2c1f"/><path d="M46 43 Q50 46 55 43" stroke="#6b3b2d" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>ふわ</span><small>やさしい</small></div>
+            <div class="familyBadge"><svg viewBox="0 0 84 58" aria-hidden="true"><polygon points="10,36 17,22 24,36 31,18 38,36 45,20 52,36 59,22 66,38" fill="#a06f4d"/><ellipse cx="38" cy="36" rx="22" ry="14" fill="#a06f4d"/><ellipse cx="50" cy="38" rx="15" ry="11" fill="#f4dfc7"/><circle cx="61" cy="39" r="2.5" fill="#3f2c1f"/><circle cx="47" cy="33" r="1.9" fill="#3f2c1f"/><circle cx="53" cy="34" r="1.9" fill="#3f2c1f"/><path d="M46 43 Q50 46 55 43" stroke="#6b3b2d" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>まる</span><small>げんき</small></div>
+            <div class="familyBadge"><svg viewBox="0 0 84 58" aria-hidden="true"><polygon points="10,36 17,22 24,36 31,18 38,36 45,20 52,36 59,22 66,38" fill="#8a6140"/><ellipse cx="38" cy="36" rx="22" ry="14" fill="#8a6140"/><ellipse cx="50" cy="38" rx="15" ry="11" fill="#f4dfc7"/><circle cx="61" cy="39" r="2.5" fill="#3f2c1f"/><circle cx="47" cy="33" r="1.9" fill="#3f2c1f"/><circle cx="53" cy="34" r="1.9" fill="#3f2c1f"/><path d="M46 43 Q50 46 55 43" stroke="#6b3b2d" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>ぴこ</span><small>ひらめき</small></div>
+          </div>
+          <div class="subTabs">
+            <button class="subTabBtn active" type="button" data-info-tab="world">世界観</button>
+            <button class="subTabBtn" type="button" data-info-tab="mom">お母さん</button>
+            <button class="subTabBtn" type="button" data-info-tab="babies">子どもたち</button>
+            <button class="subTabBtn" type="button" data-info-tab="places">遊び場</button>
+          </div>
+        </div>
+
+        <div class="infoPanel infoSection" data-info-section="world">
+          <h3>世界観</h3>
+          <p>
+            ここは、垣根に囲まれた小さなお庭。<br />
+            赤い屋根のおうちのまわりには、おもちゃ、アンティング、砂場、回し車と、
+            子どもたちの心をくすぐる遊び場が、あちこちにちりばめられています。<br /><br />
+            夕方の風がすこしひんやりしてくるころ、お母さんハリネズミのお迎えがはじまります。<br />
+            夢中で遊ぶ子たちのそばまで近づいて、やさしく何度か声をかけると、
+            赤ちゃんたちは「おうちに帰ろうかな」という気持ちになって、てくてく後ろをついてきます。<br /><br />
+            でも、おうちに帰ってひと休みした子も、また外の楽しさを思い出して、ふらりと遊びに出てしまうことも。<br />
+            そんなにぎやかな夕暮れのひとときを切り取ったのが、このゲームです。
+          </p>
+        </div>
+
+        <div class="infoPanel infoSection hiddenSection" data-info-section="mom">
+          <h3>お母さんハリネズミ</h3>
+          <div class="miniIconBubble"><svg viewBox="0 0 84 58" aria-hidden="true"><polygon points="8,34 16,18 24,34 32,14 40,34 48,16 56,34 64,18 72,36" fill="#8c623f"/><ellipse cx="37" cy="34" rx="26" ry="17" fill="#8c623f"/><ellipse cx="51" cy="36" rx="18" ry="13" fill="#f4dfc7"/><circle cx="64" cy="37" r="2.8" fill="#3f2c1f"/><circle cx="47" cy="31" r="2.1" fill="#3f2c1f"/><circle cx="54" cy="32" r="2.1" fill="#3f2c1f"/><path d="M46 42 Q52 46 58 42" stroke="#6b3b2d" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="23" cy="18" r="4.4" fill="#f48a8f"/><circle cx="33" cy="14" r="4.4" fill="#f48a8f"/></svg><div class="label">赤い屋根のおうちへ、<br />みんなをやさしく連れて帰るおかあさん。</div></div>
+          <div class="miniCard">
+            <h4>🦔 ゆうやけのお迎え名人</h4>
+            <p>
+              名前はまだ、みんなの「おかあさん」。<br />
+              あわてず、でものんびりしすぎず、6匹それぞれの遊びぐせをちゃんと覚えています。<br />
+              「ぽこはおもちゃの近くかな」「まるは回し車に夢中かも」と考えながら庭を歩き、
+              子どもたちのすぐそばまで迎えにいって、やわらかな声で何度も呼びかけます。<br /><br />
+              いちどに連れて歩けるのは3匹まで。だからこそ、どの順番で迎えにいくかが大事。<br />
+              みんなが無事に赤いおうちへ帰れるよう、夕暮れのお庭をてくてく見守っています。
+            </p>
+          </div>
+        </div>
+
+        <div class="infoPanel infoSection hiddenSection" data-info-section="babies">
+          <h3>6匹の子ハリネズミ</h3>
+          <div class="miniIconBubble"><svg viewBox="0 0 84 58" aria-hidden="true"><polygon points="10,36 17,22 24,36 31,18 38,36 45,20 52,36 59,22 66,38" fill="#9b7250"/><ellipse cx="38" cy="36" rx="22" ry="14" fill="#9b7250"/><ellipse cx="50" cy="38" rx="15" ry="11" fill="#f4dfc7"/><circle cx="61" cy="39" r="2.5" fill="#3f2c1f"/><circle cx="47" cy="33" r="1.9" fill="#3f2c1f"/><circle cx="53" cy="34" r="1.9" fill="#3f2c1f"/><path d="M46 43 Q50 46 55 43" stroke="#6b3b2d" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><div class="label">6匹ともお迎えのされ方も、遊びの好みも、ちょっぴりずつ違います。</div></div>
+          <div class="characterGrid">
+            <div class="miniCard"><h4 class="babyHeading"><svg viewBox="0 0 84 58" aria-hidden="true"><polygon points="10,36 17,22 24,36 31,18 38,36 45,20 52,36 59,22 66,38" fill="#9b7250"/><ellipse cx="38" cy="36" rx="22" ry="14" fill="#9b7250"/><ellipse cx="50" cy="38" rx="15" ry="11" fill="#f4dfc7"/><circle cx="61" cy="39" r="2.5" fill="#3f2c1f"/><circle cx="47" cy="33" r="1.9" fill="#3f2c1f"/><circle cx="53" cy="34" r="1.9" fill="#3f2c1f"/><path d="M46 43 Q50 46 55 43" stroke="#6b3b2d" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>ぽこ</span></h4><p>いちばんの先走りやさん。気になるものを見つけると、「あっ、あれ！」とでも言いたげに、よちよち一直線。おもちゃ売り場ならぬ、おもちゃ遊び場の常連です。</p></div>
+            <div class="miniCard"><h4 class="babyHeading"><svg viewBox="0 0 84 58" aria-hidden="true"><polygon points="10,36 17,22 24,36 31,18 38,36 45,20 52,36 59,22 66,38" fill="#8e6748"/><ellipse cx="38" cy="36" rx="22" ry="14" fill="#8e6748"/><ellipse cx="50" cy="38" rx="15" ry="11" fill="#f4dfc7"/><circle cx="61" cy="39" r="2.5" fill="#3f2c1f"/><circle cx="47" cy="33" r="1.9" fill="#3f2c1f"/><circle cx="53" cy="34" r="1.9" fill="#3f2c1f"/><path d="M46 43 Q50 46 55 43" stroke="#6b3b2d" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>ちく</span></h4><p>耳をぴくぴく動かしながら様子を見る、慎重派のしっかり者。すぐには振り向かないけれど、「ほんとうにお母さんかな」と確かめてから、ていねいについてきます。</p></div>
+            <div class="miniCard"><h4 class="babyHeading"><svg viewBox="0 0 84 58" aria-hidden="true"><polygon points="10,36 17,22 24,36 31,18 38,36 45,20 52,36 59,22 66,38" fill="#a77b56"/><ellipse cx="38" cy="36" rx="22" ry="14" fill="#a77b56"/><ellipse cx="50" cy="38" rx="15" ry="11" fill="#f4dfc7"/><circle cx="61" cy="39" r="2.5" fill="#3f2c1f"/><circle cx="47" cy="33" r="1.9" fill="#3f2c1f"/><circle cx="53" cy="34" r="1.9" fill="#3f2c1f"/><path d="M46 43 Q50 46 55 43" stroke="#6b3b2d" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>ころ</span></h4><p>寄り道がだいすきな、ころころ気分屋さん。砂場で足あとをつけては、次はどこへ行こうかなとふらふら。迎えにいっても、もうひと遊びしたそうな顔をしています。</p></div>
+            <div class="miniCard"><h4 class="babyHeading"><svg viewBox="0 0 84 58" aria-hidden="true"><polygon points="10,36 17,22 24,36 31,18 38,36 45,20 52,36 59,22 66,38" fill="#946746"/><ellipse cx="38" cy="36" rx="22" ry="14" fill="#946746"/><ellipse cx="50" cy="38" rx="15" ry="11" fill="#f4dfc7"/><circle cx="61" cy="39" r="2.5" fill="#3f2c1f"/><circle cx="47" cy="33" r="1.9" fill="#3f2c1f"/><circle cx="53" cy="34" r="1.9" fill="#3f2c1f"/><path d="M46 43 Q50 46 55 43" stroke="#6b3b2d" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>ふわ</span></h4><p>歩くのも休むのもゆったりめの、のんびり屋さん。ちょこんと座って風を感じるのが好きで、お母さんの声を聞くと「じゃあ帰ろうかな」と、ほっとしたようについてきます。</p></div>
+            <div class="miniCard"><h4 class="babyHeading"><svg viewBox="0 0 84 58" aria-hidden="true"><polygon points="10,36 17,22 24,36 31,18 38,36 45,20 52,36 59,22 66,38" fill="#a06f4d"/><ellipse cx="38" cy="36" rx="22" ry="14" fill="#a06f4d"/><ellipse cx="50" cy="38" rx="15" ry="11" fill="#f4dfc7"/><circle cx="61" cy="39" r="2.5" fill="#3f2c1f"/><circle cx="47" cy="33" r="1.9" fill="#3f2c1f"/><circle cx="53" cy="34" r="1.9" fill="#3f2c1f"/><path d="M46 43 Q50 46 55 43" stroke="#6b3b2d" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>まる</span></h4><p>元気いっぱいの回転だいすきっ子。回し車を見ると目がきらきらして、気分までくるくる。勢いよく遊んだあとは、ころんと向きを変えて急に甘えんぼになります。</p></div>
+            <div class="miniCard"><h4 class="babyHeading"><svg viewBox="0 0 84 58" aria-hidden="true"><polygon points="10,36 17,22 24,36 31,18 38,36 45,20 52,36 59,22 66,38" fill="#8a6140"/><ellipse cx="38" cy="36" rx="22" ry="14" fill="#8a6140"/><ellipse cx="50" cy="38" rx="15" ry="11" fill="#f4dfc7"/><circle cx="61" cy="39" r="2.5" fill="#3f2c1f"/><circle cx="47" cy="33" r="1.9" fill="#3f2c1f"/><circle cx="53" cy="34" r="1.9" fill="#3f2c1f"/><path d="M46 43 Q50 46 55 43" stroke="#6b3b2d" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>ぴこ</span></h4><p>葉っぱのにおい、風の気配、土の香り。なんでもくんくん確かめたい探検家です。アンティングの近くで立ち止まっては、庭の小さな変化をいちばん先に見つけます。</p></div>
+          </div>
+        </div>
+
+        <div class="infoPanel infoSection hiddenSection" data-info-section="places">
+          <h3>遊び場</h3>
+          <div class="placeGrid">
+            <div class="miniCard"><h4>🧸 おもちゃ</h4><p>ころころ転がるものや、ふわふわのぬいぐるみが置いてある、わくわくの角っこ。見つけた子は、まるで宝物を見つけたみたいに近寄っていきます。</p></div>
+            <div class="miniCard"><h4>🍃 アンティング</h4><p>葉っぱや草の香りがふんわり集まる場所。すんすん、くんくん、鼻先を動かしながら、子どもたちは小さな季節のにおいを楽しみます。</p></div>
+            <div class="miniCard"><h4>🏖️ 砂場</h4><p>さらさらの砂に、小さな足あとがぽつぽつ残る遊び場。向きを変えるたびに模様が増えていくので、ころのような寄り道好きにはたまりません。</p></div>
+            <div class="miniCard"><h4>🎡 回し車</h4><p>くるくる、ころころ、つい夢中になる元気の輪。いちど楽しくなってしまうと、もう一回、あと一回と遊びたくなって、なかなか帰る気分にならないこともあります。</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud">
+      <div class="panel stat">
+        <div class="label">おうちにいる</div>
+        <div class="value"><span id="savedNow">0</span>/<span id="savedTotal">0</span></div>
+      </div>
+      <div class="panel headline">
+        <div style="font-size:20px">🦔</div>
+        <div class="title" id="statusText">画面をタップして、お母さんを動かそう</div>
+      </div>
+      <div class="panel stat">
+        <div class="label">のこり時間</div>
+        <div class="value" id="timeText">45</div>
+      </div>
+    </div>
+
+    <div class="bottomUi">
+      <div class="panel controlsHint">
+        <span class="hintDot" aria-hidden="true"></span>
+        <span>近くで何回か呼ぶとついてくる。<strong>3ひきまで。</strong></span>
+      </div>
+      <div class="buttons">
+        <button id="restartBtn" type="button">もういっかい</button>
+        <button id="pauseBtn" type="button">いちじていし</button>
+        <button id="callBtn" type="button">よんでみる</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="startOverlay">
+      <div class="card">
+        <h1>ハリネズミのおかえりパトロール</h1>
+        <p>
+          夕暮れのお庭で、6匹の子ハリネズミたちは<br />
+          気になる遊び場へ、よちよち大冒険。<br />
+          お母さんはそばまで迎えにいって、やさしく何度も呼びかけながら、<br />
+          みんなを赤い屋根のおうちへ連れ戻します。
+        </p>
+        <div class="badgeRow">
+          <div class="badge">🧸 おもちゃ</div>
+          <div class="badge">🍃 アンティング</div>
+          <div class="badge">🏖️ 砂場</div>
+          <div class="badge">🎡 回し車</div>
+        </div>
+        <p>
+          1プレイ45秒。<br />
+          みんなを夕ご飯までにおうちへ連れて帰ろう！
+        </p>
+        <button class="big" id="startBtn" type="button">はじめる</button>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="resultOverlay">
+      <div class="card">
+        <h2 id="resultTitle">おつかれさま！</h2>
+        <p id="resultBody"></p>
+        <div class="badgeRow" id="resultBadges"></div>
+        <button class="big" id="playAgainBtn" type="button">もういちど遊ぶ</button>
+        <button class="small" id="closeResultBtn" type="button">庭にもどる</button>
+      </div>
+    </div>
+  </div>
+
+  
+  <script>
+    (() => {
+      const canvas = document.getElementById('game');
+      const ctx = canvas.getContext('2d');
+
+      const savedNowEl = document.getElementById('savedNow');
+      const savedTotalEl = document.getElementById('savedTotal');
+      const timeTextEl = document.getElementById('timeText');
+      const statusTextEl = document.getElementById('statusText');
+      const startOverlay = document.getElementById('startOverlay');
+      const resultOverlay = document.getElementById('resultOverlay');
+      const resultTitle = document.getElementById('resultTitle');
+      const resultBody = document.getElementById('resultBody');
+      const resultBadges = document.getElementById('resultBadges');
+      const startBtn = document.getElementById('startBtn');
+      const playAgainBtn = document.getElementById('playAgainBtn');
+      const restartBtn = document.getElementById('restartBtn');
+      const pauseBtn = document.getElementById('pauseBtn');
+      const callBtn = document.getElementById('callBtn');
+      const closeResultBtn = document.getElementById('closeResultBtn');
+      const playTabBtn = document.getElementById('playTabBtn');
+      const infoTabBtn = document.getElementById('infoTabBtn');
+      const infoScreen = document.getElementById('infoScreen');
+      const infoBackBtn = document.getElementById('infoBackBtn');
+      const infoTabButtons = [...document.querySelectorAll('[data-info-tab]')];
+      const infoSections = [...document.querySelectorAll('[data-info-section]')];
+
+      const DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      const GAME_DURATION = 45;
+      const CALL_RADIUS = 148;
+      const CALL_FORGET_DELAY = 1.7;
+      const MAX_FOLLOWERS = 3;
+      const TOTAL_BABIES = 6;
+
+      let w = 0;
+      let h = 0;
+      let garden = { x: 40, y: 80, w: 300, h: 300 };
+      let nest = { x: 110, y: 0, r: 62 };
+      let mom;
+      let babies = [];
+      let attractions = [];
+      let particles = [];
+      let floatingTexts = [];
+      let grasses = [];
+      let lastTs = 0;
+      let running = false;
+      let started = false;
+      let timer = GAME_DURATION;
+      let bestHome = Number(localStorage.getItem('hedgehog_best_home') || 0);
+      let tripScore = 0;
+      let touchTarget = null;
+      let callPulse = 0;
+      let ended = false;
+      let pausedByInfo = false;
+      let pausedManually = false;
+      let currentScreen = 'play';
+
+      const BABY_NAMES = ['ぽこ', 'ちく', 'ころ', 'ふわ', 'まる', 'ぴこ', 'つむ'];
+      const ATTRACTION_TYPES = [
+        { key: 'toy', label: 'おもちゃ', emoji: '🧸', color: '#ffb870' },
+        { key: 'anting', label: 'アンティング', emoji: '🍃', color: '#9fd48a' },
+        { key: 'sandbox', label: '砂場', emoji: '🏖️', color: '#f2d694' },
+        { key: 'wheel', label: '回し車', emoji: '🎡', color: '#8fc8ff' }
+      ];
+
+      function rand(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      function randInt(min, max) {
+        return Math.floor(rand(min, max + 1));
+      }
+
+      function clamp(v, min, max) {
+        return Math.max(min, Math.min(max, v));
+      }
+
+      function dist(a, b) {
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        return Math.hypot(dx, dy);
+      }
+
+      function moveToward(obj, target, speed, dt) {
+        const dx = target.x - obj.x;
+        const dy = target.y - obj.y;
+        const d = Math.hypot(dx, dy);
+        if (d < 0.0001) return;
+        const step = Math.min(d, speed * dt);
+        obj.x += (dx / d) * step;
+        obj.y += (dy / d) * step;
+      }
+
+      function currentHomeCount() {
+        return babies.filter(b => b.state === 'home').length;
+      }
+
+      function currentFollowerCount() {
+        return babies.filter(b => b.state === 'follow').length;
+      }
+      function getHomeZone() {
+        return {
+          x: nest.x,
+          y: nest.y + nest.r * 0.10,
+          rx: nest.r * 1.18,
+          ry: nest.r * 0.98
+        };
+      }
+
+      function isInsideHomeZone(entity, expand = 0) {
+        const zone = getHomeZone();
+        const rx = zone.rx + expand;
+        const ry = zone.ry + expand * 0.75;
+        const dx = (entity.x - zone.x) / rx;
+        const dy = (entity.y - zone.y) / ry;
+        return dx * dx + dy * dy <= 1;
+      }
+
+      function maybeFinishIfAllHome() {
+        if (running && currentHomeCount() === TOTAL_BABIES) {
+          updateHud();
+          endGame('allHome');
+        }
+      }
+
+      function syncRunningState() {
+        running = started && !ended && !pausedByInfo && !pausedManually;
+      }
+
+      function updatePauseButton() {
+        pauseBtn.textContent = pausedManually ? 'さいかい' : 'いちじていし';
+      }
+
+      function toggleManualPause() {
+        if (!started || ended || currentScreen !== 'play') return;
+        pausedManually = !pausedManually;
+        syncRunningState();
+        updatePauseButton();
+        statusTextEl.textContent = pausedManually
+          ? 'いちじていし中。もう一度押すと再開します。'
+          : 'お母さん、赤ちゃんをおうちへ案内してあげて！';
+      }
+
+      function setMainTab(mode) {
+        currentScreen = mode;
+        const playMode = mode === 'play';
+        playTabBtn.classList.toggle('active', playMode);
+        infoTabBtn.classList.toggle('active', !playMode);
+        infoScreen.classList.toggle('hidden', playMode);
+
+        pausedByInfo = !playMode;
+        syncRunningState();
+
+        if (!playMode) {
+          statusTextEl.textContent = 'せつめいを開いています。プレイに戻ると再開します。';
+        } else if (started && !ended) {
+          statusTextEl.textContent = pausedManually
+            ? 'いちじていし中。もう一度押すと再開します。'
+            : 'お母さん、赤ちゃんをおうちへ案内してあげて！';
+        }
+        updatePauseButton();
+      }
+
+      function setInfoTab(tabName) {
+        infoTabButtons.forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.infoTab === tabName);
+        });
+        infoSections.forEach((section) => {
+          section.classList.toggle('hiddenSection', section.dataset.infoSection !== tabName);
+        });
+      }
+
+      function randomGardenPoint(margin = 30, minNestDistance = 0) {
+        for (let i = 0; i < 50; i++) {
+          const p = {
+            x: rand(garden.x + margin, garden.x + garden.w - margin),
+            y: rand(garden.y + margin, garden.y + garden.h - margin)
+          };
+          if (dist(p, nest) >= minNestDistance) return p;
+        }
+        return {
+          x: rand(garden.x + margin, garden.x + garden.w - margin),
+          y: rand(garden.y + margin, garden.y + garden.h - margin)
+        };
+      }
+
+      function buildGrasses() {
+        grasses = [];
+        const count = Math.floor((garden.w * garden.h) / 22000);
+        for (let i = 0; i < count; i++) {
+          grasses.push({
+            x: rand(garden.x + 10, garden.x + garden.w - 10),
+            y: rand(garden.y + 10, garden.y + garden.h - 10),
+            h: rand(10, 24),
+            sway: rand(0, Math.PI * 2),
+            tint: rand(0, 1)
+          });
+        }
+      }
+
+      function resize() {
+        w = window.innerWidth;
+        h = window.innerHeight;
+        canvas.width = Math.floor(w * DPR);
+        canvas.height = Math.floor(h * DPR);
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+        const padX = Math.min(42, w * 0.05);
+        const topSafe = 88;
+        const bottomSafe = 120;
+        garden = {
+          x: padX,
+          y: topSafe,
+          w: w - padX * 2,
+          h: Math.max(220, h - topSafe - bottomSafe)
+        };
+
+        nest = {
+          x: garden.x + Math.min(78, garden.w * 0.13),
+          y: garden.y + garden.h - Math.min(80, garden.h * 0.15),
+          r: Math.max(48, Math.min(66, garden.w * 0.085))
+        };
+
+        buildGrasses();
+        seedAttractions();
+        placeMom();
+
+        babies.forEach((baby) => {
+          if (baby.state === 'home') return;
+          baby.x = clamp(baby.x, garden.x + baby.r, garden.x + garden.w - baby.r);
+          baby.y = clamp(baby.y, garden.y + baby.r, garden.y + garden.h - baby.r);
+          if (baby.state === 'wander') {
+            chooseAttraction(baby, true);
+          }
+        });
+      }
+
+      function seedAttractions() {
+        attractions = [];
+        const spots = [
+          { x: garden.x + garden.w * 0.28, y: garden.y + garden.h * 0.23 },
+          { x: garden.x + garden.w * 0.69, y: garden.y + garden.h * 0.18 },
+          { x: garden.x + garden.w * 0.78, y: garden.y + garden.h * 0.53 },
+          { x: garden.x + garden.w * 0.46, y: garden.y + garden.h * 0.75 }
+        ];
+
+        ATTRACTION_TYPES.forEach((type, i) => {
+          let pos = { ...spots[i] };
+          const safe = nest.r + 150;
+          if (dist(pos, nest) < safe) {
+            const ang = Math.atan2(pos.y - nest.y, pos.x - nest.x);
+            pos.x = nest.x + Math.cos(ang) * safe;
+            pos.y = nest.y + Math.sin(ang) * safe;
+          }
+          pos.x = clamp(pos.x, garden.x + 46, garden.x + garden.w - 46);
+          pos.y = clamp(pos.y, garden.y + 46, garden.y + garden.h - 46);
+
+          attractions.push({
+            ...pos,
+            r: Math.max(30, Math.min(44, garden.w * 0.05)),
+            ...type,
+            bounce: rand(0, Math.PI * 2)
+          });
+        });
+      }
+
+      function placeMom() {
+        if (mom && started) {
+          mom.x = clamp(mom.x, garden.x + 20, garden.x + garden.w - 20);
+          mom.y = clamp(mom.y, garden.y + 20, garden.y + garden.h - 20);
+          mom.targetX = clamp(mom.targetX, garden.x + 16, garden.x + garden.w - 16);
+          mom.targetY = clamp(mom.targetY, garden.y + 16, garden.y + garden.h - 16);
+          mom.r = Math.max(20, Math.min(28, garden.w * 0.034));
+          mom.speed = Math.max(170, Math.min(240, garden.w * 0.28));
+          return;
+        }
+        mom = {
+          x: nest.x - nest.r * 0.08,
+          y: nest.y + nest.r * 0.02,
+          r: Math.max(20, Math.min(28, garden.w * 0.034)),
+          speed: Math.max(170, Math.min(240, garden.w * 0.28)),
+          targetX: nest.x,
+          targetY: nest.y,
+          face: 1,
+          bounce: 0
+        };
+      }
+
+      function createBaby(index) {
+        const favorite = attractions[index % attractions.length];
+        const p = randomGardenPoint(72, nest.r + 130);
+        return {
+          name: BABY_NAMES[index % BABY_NAMES.length],
+          x: p.x,
+          y: p.y,
+          r: Math.max(11, Math.min(15, garden.w * 0.0205)),
+          speed: rand(42, 58),
+          state: 'wander',
+          favorite,
+          target: { x: favorite.x, y: favorite.y },
+          decisionTimer: rand(1.8, 3.8),
+          linger: 0,
+          followTimer: 0,
+          homeTimer: 0,
+          colorSeed: rand(0, 1),
+          face: Math.random() < 0.5 ? -1 : 1,
+          bounce: rand(0, Math.PI * 2),
+          lastAttraction: favorite,
+          wheelPhase: rand(0, Math.PI * 2),
+          requiredCalls: randInt(2, 4),
+          callProgress: 0,
+          forgetTimer: 0
+        };
+      }
+
+      function resetGame() {
+        started = true;
+        ended = false;
+        pausedByInfo = false;
+        pausedManually = false;
+        timer = GAME_DURATION;
+        tripScore = 0;
+        callPulse = 0;
+        particles = [];
+        floatingTexts = [];
+        touchTarget = null;
+        seedAttractions();
+        placeMom();
+        babies = Array.from({ length: TOTAL_BABIES }, (_, i) => createBaby(i));
+        savedTotalEl.textContent = String(TOTAL_BABIES);
+        updateHud();
+        statusTextEl.textContent = '画面をタップして、お母さんを動かそう';
+        startOverlay.classList.add('hidden');
+        resultOverlay.classList.add('hidden');
+        setMainTab('play');
+      }
+
+      function updateHud() {
+        savedNowEl.textContent = String(currentHomeCount());
+        savedTotalEl.textContent = String(TOTAL_BABIES);
+        timeTextEl.textContent = Math.max(0, Math.ceil(timer)).toString();
+      }
+
+      
+      function remainingCallsText(baby) {
+        return Math.max(1, baby.requiredCalls - baby.callProgress);
+      }
+
+function chooseAttraction(baby, fresh = false) {
+        const pool = [...attractions];
+        if (baby.lastAttraction && Math.random() < 0.55) {
+          const filtered = pool.filter(a => a !== baby.lastAttraction);
+          if (filtered.length) pool.splice(0, pool.length, ...filtered);
+        }
+        const selected = pool[Math.floor(Math.random() * pool.length)];
+        baby.target = {
+          x: selected.x + rand(-selected.r * 0.5, selected.r * 0.5),
+          y: selected.y + rand(-selected.r * 0.5, selected.r * 0.5)
+        };
+        baby.lastAttraction = selected;
+        baby.favorite = Math.random() < 0.25 || fresh ? selected : baby.favorite;
+      }
+
+      function burst(x, y, emoji = '✨', amount = 6) {
+        for (let i = 0; i < amount; i++) {
+          const isHeart = emoji === '💛';
+          const life = isHeart ? rand(0.9, 1.25) : rand(0.65, 1.1);
+          particles.push({
+            x,
+            y,
+            vx: isHeart ? rand(-28, 28) : rand(-42, 42),
+            vy: isHeart ? rand(-62, -20) : rand(-72, -14),
+            life,
+            maxLife: life,
+            emoji,
+            minAlpha: isHeart ? 0.96 : 0,
+            size: isHeart ? rand(20, 28) : rand(12, 20)
+          });
+        }
+      }
+
+      function say(x, y, text, key = '') {
+        if (key) {
+          floatingTexts = floatingTexts.filter(t => t.key !== key);
+        }
+        floatingTexts.push({
+          x,
+          y,
+          text,
+          life: 1.1,
+          key
+        });
+      }
+
+      function releaseBabyFromHome(baby) {
+        const ang = rand(-0.9, 0.2);
+        const rr = nest.r + rand(10, 18);
+        baby.x = nest.x + Math.cos(ang) * rr;
+        baby.y = nest.y + Math.sin(ang) * rr;
+        baby.state = 'wander';
+        baby.homeTimer = 0;
+        baby.callProgress = 0;
+        baby.forgetTimer = 0;
+        baby.requiredCalls = randInt(2, 4);
+        baby.decisionTimer = rand(0.5, 1.2);
+        baby.linger = 0;
+        chooseAttraction(baby, true);
+        say(baby.x, baby.y - 15, 'またあそぶ！', `leave-${baby.name}`);
+        burst(baby.x, baby.y - 4, '🍂', 4);
+      }
+
+      function callBabies() {
+        if (!running) return;
+        callPulse = 1.2;
+        burst(mom.x, mom.y - mom.r * 0.8, '💛', 8);
+
+        const nearBabies = babies
+          .filter(baby => baby.state === 'wander' && dist(baby, mom) <= CALL_RADIUS)
+          .sort((a, b) => dist(a, mom) - dist(b, mom));
+
+        if (!nearBabies.length) {
+          statusTextEl.textContent = '近くに赤ちゃんがいないみたい。';
+          return;
+        }
+
+        let freeSlots = MAX_FOLLOWERS - currentFollowerCount();
+        let recruited = 0;
+        let needMoreCalls = 0;
+        let waitingBecauseFull = 0;
+
+        nearBabies.forEach((baby) => {
+          baby.callProgress = Math.min(baby.requiredCalls, baby.callProgress + 1);
+          baby.forgetTimer = 0;
+          const left = remainingCallsText(baby);
+
+          if (baby.callProgress >= baby.requiredCalls) {
+            if (freeSlots > 0) {
+              baby.state = 'follow';
+              baby.followTimer = rand(5.8, 7.2);
+              baby.callProgress = 0;
+              baby.forgetTimer = 0;
+              baby.requiredCalls = randInt(2, 4);
+              freeSlots -= 1;
+              recruited += 1;
+              say(baby.x, baby.y - 18, 'いく！', `call-${baby.name}`);
+              burst(baby.x, baby.y - 4, '💫', 4);
+            } else {
+              waitingBecauseFull += 1;
+              baby.callProgress = baby.requiredCalls;
+              baby.forgetTimer = 0;
+              say(baby.x, baby.y - 18, 'まって〜', `call-${baby.name}`);
+            }
+          } else {
+            needMoreCalls += 1;
+            say(baby.x, baby.y - 18, `あと${left}かい`, `call-${baby.name}`);
+          }
+        });
+
+        if (recruited > 0) {
+          statusTextEl.textContent = `ついてきた！ いまは最大${MAX_FOLLOWERS}ひきまで一緒に歩けるよ。`;
+        } else if (waitingBecauseFull > 0) {
+          statusTextEl.textContent = `いっしょに連れられるのは${MAX_FOLLOWERS}ひきまで。`;
+        } else if (needMoreCalls > 0) {
+          statusTextEl.textContent = 'もう少し呼ぶと、おうちに帰る気分になるかも。';
+        }
+      }
+
+      function endGame(reason = 'timeup') {
+        if (ended) return;
+        ended = true;
+        syncRunningState();
+        resultOverlay.classList.remove('hidden');
+        updatePauseButton();
+        const homeCount = currentHomeCount();
+        if (homeCount > bestHome) {
+          bestHome = homeCount;
+          localStorage.setItem('hedgehog_best_home', String(bestHome));
+        }
+
+        if (reason === 'allHome' || homeCount === TOTAL_BABIES) {
+          resultTitle.textContent = 'みんなおかえり！';
+          resultBody.innerHTML = `全員そろって <strong>${homeCount}/${TOTAL_BABIES}</strong> ひきがおうちに帰りました。<br>お迎えした回数は <strong>${tripScore}回</strong> でした。`;
+          statusTextEl.textContent = 'みんなそろって、おうちはにぎやか！';
+        } else {
+          resultTitle.textContent = 'おつかれさま！';
+          resultBody.innerHTML = `終了時におうちにいたのは <strong>${homeCount}/${TOTAL_BABIES}</strong> ひき。<br>お迎えした回数は <strong>${tripScore}回</strong> でした。`;
+          statusTextEl.textContent = 'またお迎えにいこう。';
+        }
+
+        resultBadges.innerHTML = '';
+        const badges = [
+          `ベスト在宅: ${bestHome}ひき`,
+          `いっしょに歩けるのは${MAX_FOLLOWERS}ひき`,
+          '1プレイ45秒'
+        ];
+        badges.forEach(t => {
+          const div = document.createElement('div');
+          div.className = 'badge';
+          div.textContent = t;
+          resultBadges.appendChild(div);
+        });
+      }
+
+      function followerOffset(index) {
+        const slots = [
+          { x: -18, y: 14 },
+          { x: 10, y: 16 },
+          { x: -4, y: 28 }
+        ];
+        return slots[index] || { x: -4, y: 28 + (index - 2) * 10 };
+      }
+
+      function update(dt) {
+        if (running) {
+          timer -= dt;
+          if (timer <= 0) {
+            timer = 0;
+            updateHud();
+            endGame('timeup');
+          }
+        }
+
+        if (callPulse > 0) callPulse = Math.max(0, callPulse - dt);
+
+        if (touchTarget && running) {
+          mom.targetX = clamp(touchTarget.x, garden.x + 16, garden.x + garden.w - 16);
+          mom.targetY = clamp(touchTarget.y, garden.y + 16, garden.y + garden.h - 16);
+        }
+
+        const momTarget = { x: mom.targetX, y: mom.targetY };
+        if (dist(mom, momTarget) > 4) {
+          moveToward(mom, momTarget, mom.speed, dt);
+          mom.face = momTarget.x >= mom.x ? 1 : -1;
+        }
+        mom.x = clamp(mom.x, garden.x + mom.r, garden.x + garden.w - mom.r);
+        mom.y = clamp(mom.y, garden.y + mom.r, garden.y + garden.h - mom.r);
+        mom.bounce += dt * 8;
+
+        const followers = babies.filter(b => b.state === 'follow');
+
+        babies.forEach((baby) => {
+          baby.bounce += dt * 7;
+          baby.wheelPhase += dt * 5;
+
+          if (baby.state === 'home') {
+            if (running) {
+              baby.homeTimer -= dt;
+              if (baby.homeTimer <= 0) {
+                releaseBabyFromHome(baby);
+                updateHud();
+              }
+            }
+            return;
+          }
+
+          if (baby.state === 'follow') {
+            baby.followTimer -= dt;
+            const followIndex = Math.max(0, followers.indexOf(baby));
+            const slot = followerOffset(followIndex);
+            const followOffset = {
+              x: mom.x + slot.x * mom.face,
+              y: mom.y + slot.y
+            };
+            moveToward(baby, followOffset, baby.speed + 64, dt);
+            baby.face = mom.face;
+
+            if (isInsideHomeZone(baby, baby.r + 14) && isInsideHomeZone(mom, mom.r + 24)) {
+              baby.state = 'home';
+              baby.homeTimer = rand(5.5, 9.0);
+              tripScore += 1;
+              burst(baby.x, baby.y - 5, '🏡', 8);
+              say(nest.x + rand(-18, 18), nest.y - nest.r - 8, `${baby.name} おかえり！`, `home-${baby.name}`);
+              statusTextEl.textContent = `${baby.name} が、おうちに戻った！`;
+              updateHud();
+              maybeFinishIfAllHome();
+              return;
+            }
+
+            if (baby.followTimer <= 0 && dist(baby, mom) > 128) {
+              baby.state = 'wander';
+              baby.callProgress = 0;
+              baby.forgetTimer = 0;
+              baby.requiredCalls = randInt(2, 4);
+              baby.decisionTimer = rand(0.8, 1.6);
+              chooseAttraction(baby);
+              say(baby.x, baby.y - 18, 'あそびたい！', `call-${baby.name}`);
+            }
+            return;
+          }
+
+          baby.decisionTimer -= dt;
+          if (baby.linger > 0) baby.linger -= dt;
+
+          if (baby.callProgress > 0) {
+            if (dist(baby, mom) > CALL_RADIUS + 24) {
+              baby.forgetTimer += dt;
+              if (baby.forgetTimer >= CALL_FORGET_DELAY) {
+                baby.callProgress = Math.max(0, baby.callProgress - 1);
+                baby.forgetTimer = 0;
+                if (baby.callProgress > 0) {
+                  say(baby.x, baby.y - 18, `あと${remainingCallsText(baby)}かい`, `call-${baby.name}`);
+                }
+              }
+            } else {
+              baby.forgetTimer = 0;
+            }
+          } else {
+            baby.forgetTimer = 0;
+          }
+
+          if (baby.linger > 0) {
+            if (baby.lastAttraction && baby.lastAttraction.key === 'wheel') {
+              const a = baby.lastAttraction;
+              const rr = a.r * 0.58;
+              baby.x = a.x + Math.cos(baby.wheelPhase) * rr;
+              baby.y = a.y + Math.sin(baby.wheelPhase) * rr * 0.55;
+              baby.face = Math.cos(baby.wheelPhase) >= 0 ? 1 : -1;
+            }
+            return;
+          }
+
+          if (baby.decisionTimer <= 0) {
+            chooseAttraction(baby);
+            baby.decisionTimer = rand(2.1, 4.3);
+          }
+
+          moveToward(baby, baby.target, baby.speed, dt);
+          baby.face = baby.target.x >= baby.x ? 1 : -1;
+
+          if (Math.hypot(baby.x - baby.target.x, baby.y - baby.target.y) < 10) {
+            baby.linger = rand(1.2, 2.8);
+            if (baby.lastAttraction) {
+              const lines = {
+                toy: 'きらきら！',
+                anting: 'すんすん',
+                sandbox: 'さらさら',
+                wheel: 'くるくる'
+              };
+              say(baby.x, baby.y - 15, lines[baby.lastAttraction.key] || '♪', `play-${baby.name}`);
+            }
+          }
+        });
+
+        particles = particles.filter(p => {
+          p.life -= dt;
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.vy += 100 * dt;
+          return p.life > 0;
+        });
+
+        floatingTexts = floatingTexts.filter(t => {
+          t.life -= dt;
+          t.y -= 24 * dt;
+          return t.life > 0;
+        });
+
+        if (running) maybeFinishIfAllHome();
+        updateHud();
+      }
+
+      function drawSkyAndGround() {
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+        skyGrad.addColorStop(0, '#d7f6ff');
+        skyGrad.addColorStop(0.38, '#f5ffd7');
+        skyGrad.addColorStop(1, '#fff1d3');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        const groundGrad = ctx.createLinearGradient(0, garden.y, 0, garden.y + garden.h);
+        groundGrad.addColorStop(0, '#dff7bf');
+        groundGrad.addColorStop(1, '#bde28d');
+        ctx.fillStyle = groundGrad;
+        roundRect(ctx, garden.x, garden.y, garden.w, garden.h, 28, true, false);
+
+        ctx.save();
+        ctx.beginPath();
+        roundRectPath(ctx, garden.x, garden.y, garden.w, garden.h, 28);
+        ctx.clip();
+
+        for (let i = 0; i < grasses.length; i++) {
+          const g = grasses[i];
+          const sway = Math.sin(lastTs / 800 + g.sway) * (3 + g.tint * 2);
+          ctx.strokeStyle = g.tint > 0.5 ? 'rgba(122, 186, 98, 0.45)' : 'rgba(142, 198, 115, 0.42)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(g.x, g.y);
+          ctx.quadraticCurveTo(g.x + sway, g.y - g.h * 0.6, g.x + sway * 0.4, g.y - g.h);
+          ctx.stroke();
+        }
+
+        for (let i = 0; i < 12; i++) {
+          ctx.fillStyle = 'rgba(255,255,255,0.16)';
+          ctx.beginPath();
+          ctx.ellipse(
+            garden.x + (garden.w / 12) * i + Math.sin(i * 1.5) * 10,
+            garden.y + garden.h * 0.12 + Math.cos(i * 0.8 + lastTs / 1400) * 8,
+            22,
+            10,
+            0,
+            0,
+            Math.PI * 2
+          );
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function drawNest() {
+        const x = nest.x;
+        const y = nest.y;
+        const r = nest.r;
+
+        const houseW = r * 1.95;
+        const houseH = r * 1.12;
+        const houseLeft = x - houseW / 2;
+        const houseTop = y - houseH * 0.18;
+        const roofY = houseTop - r * 0.62;
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(84, 49, 28, 0.18)';
+        ctx.shadowBlur = 18;
+
+        const wallGrad = ctx.createLinearGradient(x, houseTop, x, houseTop + houseH);
+        wallGrad.addColorStop(0, '#fff5ec');
+        wallGrad.addColorStop(1, '#f2dcc8');
+        ctx.fillStyle = wallGrad;
+        roundRect(ctx, houseLeft, houseTop, houseW, houseH, r * 0.16, true, false);
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(255,255,255,0.38)';
+        roundRect(ctx, houseLeft + 7, houseTop + 8, houseW - 14, houseH * 0.24, r * 0.09, true, false);
+
+        ctx.fillStyle = '#d06563';
+        ctx.beginPath();
+        ctx.moveTo(houseLeft - r * 0.08, houseTop + houseH * 0.12);
+        ctx.quadraticCurveTo(x - houseW * 0.28, roofY, x, roofY + r * 0.06);
+        ctx.quadraticCurveTo(x + houseW * 0.28, roofY, houseLeft + houseW + r * 0.08, houseTop + houseH * 0.12);
+        ctx.lineTo(houseLeft + houseW + r * 0.02, houseTop + houseH * 0.20);
+        ctx.quadraticCurveTo(x + houseW * 0.26, roofY + r * 0.18, x, roofY + r * 0.22);
+        ctx.quadraticCurveTo(x - houseW * 0.26, roofY + r * 0.18, houseLeft - r * 0.02, houseTop + houseH * 0.20);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#bf5755';
+        ctx.beginPath();
+        ctx.moveTo(houseLeft - r * 0.08, houseTop + houseH * 0.12);
+        ctx.quadraticCurveTo(x - houseW * 0.28, roofY, x, roofY + r * 0.06);
+        ctx.quadraticCurveTo(x + houseW * 0.28, roofY, houseLeft + houseW + r * 0.08, houseTop + houseH * 0.12);
+        ctx.strokeStyle = 'rgba(129, 49, 47, 0.45)';
+        ctx.lineWidth = 2.2;
+        ctx.stroke();
+
+        ctx.fillStyle = '#a87368';
+        roundRect(ctx, x + houseW * 0.19, roofY + r * 0.22, r * 0.30, r * 0.56, r * 0.05, true, false);
+        ctx.fillStyle = '#d2a195';
+        roundRect(ctx, x + houseW * 0.23, roofY + r * 0.31, r * 0.22, r * 0.40, r * 0.04, true, false);
+
+        ctx.fillStyle = '#9d775f';
+        roundRect(ctx, x - r * 0.26, houseTop + houseH * 0.42, r * 0.52, r * 0.48, r * 0.08, true, false);
+        ctx.fillStyle = '#f7e2b7';
+        ctx.beginPath();
+        ctx.arc(x + r * 0.12, houseTop + houseH * 0.66, r * 0.04, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#b9d9ff';
+        roundRect(ctx, x - houseW * 0.34, houseTop + houseH * 0.25, r * 0.28, r * 0.22, r * 0.05, true, false);
+        roundRect(ctx, x + houseW * 0.06, houseTop + houseH * 0.25, r * 0.28, r * 0.22, r * 0.05, true, false);
+
+        ctx.strokeStyle = 'rgba(96, 78, 62, 0.45)';
+        ctx.lineWidth = 2;
+        [x - houseW * 0.34, x + houseW * 0.06].forEach(wx => {
+          ctx.beginPath();
+          ctx.moveTo(wx + r * 0.14, houseTop + houseH * 0.25);
+          ctx.lineTo(wx + r * 0.14, houseTop + houseH * 0.47);
+          ctx.moveTo(wx, houseTop + houseH * 0.36);
+          ctx.lineTo(wx + r * 0.28, houseTop + houseH * 0.36);
+          ctx.stroke();
+        });
+
+        ctx.fillStyle = '#fffdf4';
+        ctx.font = `800 ${Math.max(13, r * 0.24)}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText('おうち', x, y - r - 16);
+        ctx.restore();
+      }
+
+      function drawAttraction(a) {
+        ctx.save();
+        const pulse = Math.sin(lastTs / 600 + a.bounce) * 2;
+        ctx.translate(a.x, a.y);
+        ctx.shadowColor = 'rgba(40, 24, 10, 0.12)';
+        ctx.shadowBlur = 14;
+
+        ctx.fillStyle = a.color;
+        ctx.beginPath();
+        ctx.arc(0, 0, a.r + pulse, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.beginPath();
+        ctx.arc(-a.r * 0.25, -a.r * 0.25, a.r * 0.36, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (a.key === 'sandbox') {
+          ctx.strokeStyle = '#eabf6a';
+          ctx.lineWidth = 6;
+          ctx.strokeRect(-a.r * 0.55, -a.r * 0.55, a.r * 1.1, a.r * 1.1);
+          ctx.fillStyle = '#f7e3a6';
+          ctx.fillRect(-a.r * 0.44, -a.r * 0.44, a.r * 0.88, a.r * 0.88);
+        } else if (a.key === 'wheel') {
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(0, 0, a.r * 0.66, 0, Math.PI * 2);
+          ctx.stroke();
+          for (let i = 0; i < 6; i++) {
+            const ang = (Math.PI * 2 / 6) * i + lastTs / 1000;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(Math.cos(ang) * a.r * 0.66, Math.sin(ang) * a.r * 0.66);
+            ctx.stroke();
+          }
+        }
+
+        ctx.font = `${Math.max(22, a.r * 0.9)}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(a.emoji, 0, 2);
+
+        ctx.fillStyle = '#5b4332';
+        ctx.font = `800 ${Math.max(12, a.r * 0.3)}px sans-serif`;
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(a.label, 0, a.r + 18);
+        ctx.restore();
+      }
+
+      function drawHedgehog(entity, isMom = false) {
+        const r = entity.r;
+        const bounce = Math.sin(entity.bounce) * (isMom ? 1.8 : 1.4);
+
+        ctx.save();
+        ctx.translate(entity.x, entity.y + bounce);
+        ctx.scale(entity.face || 1, 1);
+
+        const bodyColor = isMom ? '#8c623f' : entity.colorSeed > 0.5 ? '#9b7250' : '#8a6140';
+        const faceColor = isMom ? '#f5ddbf' : '#f4dfc7';
+
+        ctx.shadowColor = 'rgba(50, 30, 12, 0.18)';
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = bodyColor;
+        drawSpikyBack(0, 0, r * (isMom ? 1.15 : 1), 12, isMom ? 7 : 6);
+        ctx.shadowBlur = 0;
+
+        ctx.fillStyle = faceColor;
+        ctx.beginPath();
+        ctx.ellipse(r * 0.12, r * 0.14, r * 0.72, r * 0.54, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#3f2c1f';
+        ctx.beginPath();
+        ctx.arc(r * 0.62, r * 0.18, r * 0.11, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(r * 0.05, -r * 0.05, r * 0.07, 0, Math.PI * 2);
+        ctx.arc(r * 0.27, -r * 0.01, r * 0.07, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#6b3b2d';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(r * 0.02, r * 0.26);
+        ctx.quadraticCurveTo(r * 0.18, r * 0.36, r * 0.34, r * 0.25);
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(82, 58, 40, 0.8)';
+        ctx.lineWidth = 2.3;
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.2, r * 0.55);
+        ctx.lineTo(-r * 0.1, r * 0.77);
+        ctx.moveTo(r * 0.04, r * 0.56);
+        ctx.lineTo(r * 0.14, r * 0.79);
+        ctx.stroke();
+
+        if (isMom) {
+          ctx.fillStyle = '#f48a8f';
+          ctx.beginPath();
+          ctx.arc(-r * 0.18, -r * 0.42, r * 0.12, 0, Math.PI * 2);
+          ctx.arc(r * 0.02, -r * 0.48, r * 0.12, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      function drawSpikyBack(x, y, r, spikes, spikeLen) {
+        ctx.beginPath();
+        for (let i = 0; i < spikes; i++) {
+          const ang = Math.PI + (Math.PI / (spikes - 1)) * i;
+          const rr = i % 2 === 0 ? r : r + spikeLen;
+          const px = x + Math.cos(ang) * rr;
+          const py = y + Math.sin(ang) * rr;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.ellipse(x + r * 0.12, y + r * 0.08, r * 1.0, r * 0.8, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawHomeBabies() {
+        const homeBabies = babies.filter(b => b.state === 'home');
+        homeBabies.forEach((baby, i) => {
+          const col = i % 3;
+          const row = Math.floor(i / 3);
+          const px = nest.x - nest.r * 0.34 + col * nest.r * 0.34;
+          const py = nest.y - nest.r * 0.02 + row * nest.r * 0.24;
+          drawHedgehog({
+            ...baby,
+            x: px,
+            y: py,
+            r: Math.max(5.5, nest.r * 0.12),
+            bounce: lastTs / 380 + i * 0.7,
+            face: 1
+          }, false);
+        });
+      }
+
+      function drawCallPulse() {
+        if (callPulse <= 0) return;
+        const alpha = callPulse / 1.2;
+        ctx.save();
+        ctx.strokeStyle = `rgba(255, 143, 122, ${0.4 * alpha})`;
+        ctx.lineWidth = 5;
+        for (let i = 0; i < 2; i++) {
+          ctx.beginPath();
+          ctx.arc(mom.x, mom.y, 66 + i * 42 + (1 - alpha) * 22, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      function drawHeartParticle(x, y, size) {
+        const s = size / 24;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(s, s);
+        ctx.beginPath();
+        ctx.moveTo(0, 8);
+        ctx.bezierCurveTo(0, 2, -10, -4, -10, -11);
+        ctx.bezierCurveTo(-10, -18, -2, -20, 0, -13);
+        ctx.bezierCurveTo(2, -20, 10, -18, 10, -11);
+        ctx.bezierCurveTo(10, -4, 0, 2, 0, 8);
+        ctx.closePath();
+        ctx.fillStyle = '#ffd84d';
+        ctx.fill();
+        ctx.lineWidth = 1.8;
+        ctx.strokeStyle = '#d39a00';
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawParticles() {
+        particles.forEach(p => {
+          ctx.save();
+          const baseAlpha = Math.max(0, p.life / p.maxLife);
+          ctx.globalAlpha = Math.max(p.minAlpha || 0, baseAlpha);
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+
+          if (p.emoji === '💛') {
+            drawHeartParticle(p.x, p.y, p.size);
+          } else {
+            ctx.font = `${p.size}px sans-serif`;
+            ctx.fillText(p.emoji, p.x, p.y);
+          }
+          ctx.restore();
+        });
+
+        floatingTexts.forEach(t => {
+          ctx.save();
+          ctx.globalAlpha = Math.min(1, t.life);
+          ctx.fillStyle = '#5b4332';
+          ctx.font = '800 16px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(t.text, t.x, t.y);
+          ctx.restore();
+        });
+      }
+
+      function drawTouchMarker() {
+        if (!touchTarget || !running) return;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(touchTarget.x, touchTarget.y, 14 + Math.sin(lastTs / 120) * 2, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawPausedBanner() {
+        if (!started || ended || running || currentScreen !== 'play') return;
+        ctx.save();
+        ctx.fillStyle = 'rgba(255, 251, 245, 0.92)';
+        roundRect(ctx, w / 2 - 104, garden.y + 18, 208, 46, 18, true, false);
+        ctx.fillStyle = '#6d5370';
+        ctx.font = '800 20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('いちじていし中', w / 2, garden.y + 41);
+        ctx.restore();
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, w, h);
+        drawSkyAndGround();
+        drawNest();
+        attractions.forEach(drawAttraction);
+        drawTouchMarker();
+        babies.filter(b => b.state !== 'home').forEach((b) => drawHedgehog(b, false));
+        drawCallPulse();
+        drawHedgehog(mom, true);
+        drawHomeBabies();
+        drawParticles();
+        drawPausedBanner();
+      }
+
+      function loop(ts) {
+        if (!lastTs) lastTs = ts;
+        const dt = Math.min(0.033, (ts - lastTs) / 1000);
+        lastTs = ts;
+        update(dt);
+        render();
+        requestAnimationFrame(loop);
+      }
+
+      function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+        roundRectPath(ctx, x, y, width, height, radius);
+        if (fill) ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+
+      function roundRectPath(ctx, x, y, width, height, radius) {
+        const r = Math.min(radius, width / 2, height / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + width, y, x + width, y + height, r);
+        ctx.arcTo(x + width, y + height, x, y + height, r);
+        ctx.arcTo(x, y + height, x, y, r);
+        ctx.arcTo(x, y, x + width, y, r);
+        ctx.closePath();
+      }
+
+      function pointerPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      }
+
+      let pointerDown = false;
+      function handlePointer(e) {
+        const p = pointerPos(e);
+        touchTarget = {
+          x: clamp(p.x, garden.x + 10, garden.x + garden.w - 10),
+          y: clamp(p.y, garden.y + 10, garden.y + garden.h - 10)
+        };
+      }
+
+      canvas.addEventListener('pointerdown', (e) => {
+        if (!started || !running) return;
+        pointerDown = true;
+        handlePointer(e);
+      });
+      canvas.addEventListener('pointermove', (e) => {
+        if (!pointerDown || !started || !running) return;
+        handlePointer(e);
+      });
+      window.addEventListener('pointerup', () => {
+        pointerDown = false;
+      });
+      window.addEventListener('pointercancel', () => {
+        pointerDown = false;
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key.toLowerCase() === 'p') {
+          toggleManualPause();
+          return;
+        }
+        if (!started || !running || currentScreen !== 'play') return;
+        const step = 46;
+        if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') mom.targetY -= step;
+        if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') mom.targetY += step;
+        if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') mom.targetX -= step;
+        if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') mom.targetX += step;
+        if (e.key === ' ') callBabies();
+        mom.targetX = clamp(mom.targetX, garden.x + 16, garden.x + garden.w - 16);
+        mom.targetY = clamp(mom.targetY, garden.y + 16, garden.y + garden.h - 16);
+      });
+
+      startBtn.addEventListener('click', resetGame);
+      playAgainBtn.addEventListener('click', resetGame);
+      restartBtn.addEventListener('click', resetGame);
+      pauseBtn.addEventListener('click', toggleManualPause);
+      closeResultBtn.addEventListener('click', () => resultOverlay.classList.add('hidden'));
+      callBtn.addEventListener('click', callBabies);
+      playTabBtn.addEventListener('click', () => setMainTab('play'));
+      infoTabBtn.addEventListener('click', () => setMainTab('info'));
+      infoBackBtn.addEventListener('click', () => setMainTab('play'));
+      infoTabButtons.forEach((btn) => {
+        btn.addEventListener('click', () => setInfoTab(btn.dataset.infoTab));
+      });
+
+      window.addEventListener('resize', resize);
+      resize();
+      setInfoTab('world');
+      setMainTab('play');
+      updatePauseButton();
+      savedTotalEl.textContent = String(TOTAL_BABIES);
+      updateHud();
+      requestAnimationFrame(loop);
+    })();
+  </script>
+
+</body>
+</html>

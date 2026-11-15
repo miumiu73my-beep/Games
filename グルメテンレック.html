@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <title>ごちそう待ちテンレック</title>
+  <style>
+    :root {
+      --bg1: #fffaf3;
+      --bg2: #ffe9f0;
+      --ink: #564740;
+      --muted: #7b6b65;
+      --line: rgba(86, 71, 64, 0.12);
+      --glass: rgba(255, 255, 255, 0.74);
+      --glass-strong: rgba(255, 255, 255, 0.9);
+      --accent: #ff9dba;
+      --accent-soft: #ffd8e6;
+      --gold: #ffd36f;
+      --good: #9ad1a7;
+      --warn: #ffb26f;
+      --danger: #ff8a8a;
+      --shadow: 0 12px 36px rgba(144, 95, 113, 0.14);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, #fff4b8 0%, transparent 28%),
+        radial-gradient(circle at top right, #ffd6e7 0%, transparent 34%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      padding: env(safe-area-inset-top) 12px env(safe-area-inset-bottom) 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 390px;
+      padding-bottom: 8px;
+    }
+
+    .screen {
+      display: none;
+      animation: fadeIn 180ms ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+    }
+
+    .section-gap > * + * {
+      margin-top: 12px;
+    }
+
+    .topbar {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: linear-gradient(180deg, rgba(255,250,243,0.88), rgba(255,250,243,0.45), transparent);
+      backdrop-filter: blur(6px);
+      margin-bottom: 10px;
+      border-radius: 20px;
+    }
+
+    .nav-btn {
+      flex: 1;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.76);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 11px 8px;
+      font-size: 0.86rem;
+      font-weight: 800;
+      box-shadow: none;
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(180deg, #fff6c8, #ffdca3);
+    }
+
+    .hero-card,
+    .panel,
+    .status-card,
+    .score-card,
+    .offer-card,
+    .log-card,
+    .species-note,
+    .home-stats,
+    .start-card,
+    .detail-card {
+      padding: 16px;
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    .home-title {
+      padding: 18px 18px 12px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .title-row h1 {
+      font-size: 1.36rem;
+      line-height: 1.25;
+    }
+
+    .badge {
+      font-size: 0.74rem;
+      font-weight: 800;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.86);
+      border: 1px solid var(--line);
+    }
+
+    .subtitle,
+    .small-text,
+    .info-body,
+    .log-card,
+    .food-copy,
+    .species-copy,
+    .meta-line {
+      line-height: 1.72;
+      font-size: 0.93rem;
+    }
+
+    .small-text {
+      color: var(--muted);
+    }
+
+    .species-note {
+      display: grid;
+      gap: 8px;
+      background: rgba(255,255,255,0.68);
+      border-radius: var(--radius-lg);
+      border: 1px dashed rgba(86,71,64,0.14);
+    }
+
+    .species-note strong {
+      font-size: 0.95rem;
+    }
+
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      right: -36px;
+      top: -26px;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.82), transparent 70%);
+      pointer-events: none;
+    }
+
+    .tenrec-stage {
+      border-radius: 24px;
+      padding: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,247,236,0.9));
+      border: 1px solid rgba(86,71,64,0.08);
+      box-shadow: inset 0 8px 18px rgba(255,255,255,0.72);
+    }
+
+    .tenrec-ill {
+      width: 100%;
+      aspect-ratio: 1.45 / 1;
+      display: block;
+    }
+
+    .tenrec-ill .blink {
+      transform-origin: center;
+      animation: blink 5.5s infinite;
+    }
+
+    .tenrec-ill .nose {
+      animation: noseWiggle 2.2s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    .tenrec-ill .float {
+      animation: floaty 2.8s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    .hero-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .hero-name {
+      font-size: 1.02rem;
+      font-weight: 900;
+    }
+
+    .hero-chip {
+      font-size: 0.78rem;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.84);
+      border: 1px solid var(--line);
+    }
+
+    .home-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .mini-stat {
+      border-radius: 22px;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--line);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .mini-stat .num {
+      margin-top: 6px;
+      font-size: 1.28rem;
+      font-weight: 900;
+    }
+
+    .action-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      border-radius: 22px;
+      padding: 15px 14px;
+      font-size: 1rem;
+      font-weight: 900;
+      color: var(--ink);
+      transition: transform 120ms ease, opacity 120ms ease, filter 120ms ease;
+      box-shadow: var(--shadow);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: default;
+      filter: grayscale(0.24);
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, #fff4c8, #ffd88a);
+    }
+
+    .btn-soft {
+      background: linear-gradient(180deg, #ffe0ec, #ffc4d7);
+    }
+
+    .btn-subtle {
+      background: linear-gradient(180deg, #ffffff, #f4ecf1);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .btn-wait {
+      background: linear-gradient(180deg, #fff7d0, #ffe59c);
+    }
+
+    .btn-eat {
+      background: linear-gradient(180deg, #ffdcea, #ffb8d1);
+    }
+
+    .btn-inline {
+      width: 100%;
+      padding: 13px 12px;
+      font-size: 0.95rem;
+    }
+
+    .score-grid,
+    .status-grid,
+    .control-grid,
+    .collection-grid,
+    .info-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .score-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .status-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .score-card,
+    .status-card {
+      text-align: center;
+    }
+
+    .score-label,
+    .status-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+
+    .score-num {
+      font-size: 1.28rem;
+      font-weight: 900;
+    }
+
+    .status-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+    }
+
+    .meter {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.82);
+      border: 1px solid rgba(86,71,64,0.08);
+    }
+
+    .fill {
+      height: 100%;
+      width: 50%;
+      border-radius: inherit;
+      transition: width 160ms ease;
+    }
+
+    .fill.hunger {
+      background: linear-gradient(90deg, #ffe07b, #ffad73);
+    }
+
+    .fill.owner {
+      background: linear-gradient(90deg, #bce0ff, #9dd6ab);
+    }
+
+    .start-card {
+      background: rgba(255,255,255,0.76);
+      border: 1px dashed rgba(86,71,64,0.16);
+      text-align: center;
+    }
+
+    .game-hero {
+      display: grid;
+      gap: 12px;
+    }
+
+    .mood-bubble {
+      position: relative;
+      background: rgba(255,255,255,0.84);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 14px;
+      min-height: 84px;
+      line-height: 1.72;
+      font-size: 0.96rem;
+    }
+
+    .mood-bubble::before {
+      content: "";
+      position: absolute;
+      left: 24px;
+      top: -8px;
+      width: 16px;
+      height: 16px;
+      transform: rotate(45deg);
+      background: rgba(255,255,255,0.84);
+      border-left: 1px solid var(--line);
+      border-top: 1px solid var(--line);
+    }
+
+    .offer-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.78));
+    }
+
+    .offer-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .offer-label {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .rarity-tag {
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 219, 124, 0.28);
+      border: 1px solid rgba(255, 211, 111, 0.42);
+    }
+
+    .offer-main {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .dish-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, #fff7df, #ffffff);
+      border: 1px solid rgba(86,71,64,0.08);
+      font-size: 2.9rem;
+    }
+
+    .dish-name {
+      font-size: 1.14rem;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .food-copy {
+      color: var(--ink);
+    }
+
+    .delish {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 0.87rem;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.88);
+      border: 1px solid rgba(86,71,64,0.08);
+    }
+
+    .control-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .log-card {
+      min-height: 94px;
+    }
+
+    .page-title {
+      padding: 16px;
+    }
+
+    .page-title h2 {
+      font-size: 1.12rem;
+      margin-bottom: 6px;
+    }
+
+    .collection-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .food-tile {
+      width: 100%;
+      text-align: left;
+      padding: 14px 12px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.78);
+      border: 1px solid var(--line);
+      box-shadow: none;
+      min-height: 118px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .food-tile.locked {
+      opacity: 0.72;
+      filter: saturate(0.75);
+    }
+
+    .food-topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .food-emoji {
+      font-size: 1.9rem;
+      line-height: 1;
+    }
+
+    .food-name {
+      font-weight: 900;
+      font-size: 0.96rem;
+      line-height: 1.45;
+    }
+
+    .food-meta,
+    .food-hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .info-card {
+      padding: 16px;
+      background: rgba(255,255,255,0.78);
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .info-card h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .info-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .info-pill {
+      padding: 10px 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(86,71,64,0.08);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      padding: 12px 8px 2px;
+      line-height: 1.7;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(86,71,64,0.28);
+      backdrop-filter: blur(6px);
+      z-index: 40;
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 390px;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: 0 22px 42px rgba(86,71,64,0.18);
+      padding: 18px;
+      animation: rise 180ms ease;
+    }
+
+    .modal-title {
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+    }
+
+    .result-score {
+      font-size: 2rem;
+      font-weight: 900;
+      margin: 8px 0 6px;
+    }
+
+    .modal-copy {
+      font-size: 0.94rem;
+      line-height: 1.8;
+      margin-bottom: 12px;
+    }
+
+    .modal-actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .detail-head {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .detail-icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 22px;
+      display: grid;
+      place-items: center;
+      font-size: 2.5rem;
+      background: linear-gradient(180deg, #fff6de, #fff);
+      border: 1px solid rgba(86,71,64,0.08);
+    }
+
+    .detail-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .detail-pill {
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.88);
+      border: 1px solid var(--line);
+    }
+
+    .sparkle {
+      animation: sparkle 0.7s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes sparkle {
+      0% { transform: scale(0.98); filter: brightness(1); }
+      40% { transform: scale(1.02); filter: brightness(1.08); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+
+    @keyframes blink {
+      0%, 46%, 52%, 100% { transform: scaleY(1); }
+      48%, 50% { transform: scaleY(0.18); }
+    }
+
+    @keyframes noseWiggle {
+      0%, 100% { transform: translateX(0); }
+      40% { transform: translateX(-0.6px) rotate(-2deg); }
+      70% { transform: translateX(0.8px) rotate(2deg); }
+    }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    @media (max-width: 360px) {
+      .score-grid { grid-template-columns: repeat(3, 1fr); }
+      .collection-grid { grid-template-columns: 1fr 1fr; }
+      .offer-main { grid-template-columns: 72px 1fr; }
+      .dish-icon { width: 72px; height: 72px; font-size: 2.6rem; }
+      .control-grid { grid-template-columns: 1fr; }
+      .status-grid { grid-template-columns: 1fr; }
+      .home-stats { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section id="homeScreen" class="screen active section-gap">
+      <div class="card home-title">
+        <div class="title-row">
+          <h1>ごちそう待ちテンレック</h1>
+          <div class="badge">1プレイ45秒</div>
+        </div>
+        <p class="subtitle">
+          「あとで、もっとおいしいのが来るかも」を覚えてしまった、
+          グルメなヒメハリテンレックのゆるいごはん時間。
+        </p>
+      </div>
+
+      <div class="card hero-card">
+        <div class="tenrec-stage">
+          <svg class="tenrec-ill" viewBox="0 0 360 250" xmlns="http://www.w3.org/2000/svg" aria-label="ヒメハリテンレックのイラスト">
+            <defs>
+              <linearGradient id="bgGlow" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#fff8eb"/>
+                <stop offset="100%" stop-color="#ffe5ef"/>
+              </linearGradient>
+              <linearGradient id="spineBase" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#b38a63"/>
+                <stop offset="100%" stop-color="#7b5f4e"/>
+              </linearGradient>
+              <linearGradient id="spineTip" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#efe4c4"/>
+                <stop offset="100%" stop-color="#b48a61"/>
+              </linearGradient>
+              <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#e6c1af"/>
+                <stop offset="100%" stop-color="#c38f7b"/>
+              </linearGradient>
+            </defs>
+            <ellipse cx="180" cy="130" rx="145" ry="88" fill="url(#bgGlow)"/>
+            <g class="float">
+              <ellipse cx="218" cy="135" rx="110" ry="72" fill="url(#spineBase)" opacity="0.18"/>
+              <g opacity="0.98">
+                <path d="M127 145C118 79 255 44 315 98C333 114 334 159 306 184C268 217 165 205 133 166Z" fill="url(#spineBase)"/>
+                <g stroke="url(#spineTip)" stroke-linecap="round" stroke-width="4.4">
+                  <line x1="137" y1="141" x2="112" y2="96"/>
+                  <line x1="152" y1="123" x2="137" y2="81"/>
+                  <line x1="170" y1="113" x2="164" y2="72"/>
+                  <line x1="190" y1="106" x2="192" y2="66"/>
+                  <line x1="211" y1="103" x2="221" y2="63"/>
+                  <line x1="231" y1="106" x2="249" y2="69"/>
+                  <line x1="251" y1="113" x2="276" y2="80"/>
+                  <line x1="271" y1="124" x2="301" y2="97"/>
+                  <line x1="286" y1="140" x2="318" y2="123"/>
+                  <line x1="291" y1="159" x2="324" y2="154"/>
+                  <line x1="280" y1="177" x2="312" y2="188"/>
+                  <line x1="260" y1="190" x2="285" y2="214"/>
+                  <line x1="236" y1="197" x2="250" y2="229"/>
+                  <line x1="210" y1="200" x2="212" y2="235"/>
+                  <line x1="184" y1="198" x2="173" y2="231"/>
+                  <line x1="161" y1="190" x2="140" y2="218"/>
+                </g>
+                <g stroke="#f1e4c8" stroke-linecap="round" stroke-width="2.1" opacity="0.95">
+                  <line x1="151" y1="148" x2="132" y2="113"/>
+                  <line x1="171" y1="134" x2="159" y2="99"/>
+                  <line x1="191" y1="128" x2="188" y2="92"/>
+                  <line x1="214" y1="128" x2="222" y2="93"/>
+                  <line x1="237" y1="134" x2="252" y2="101"/>
+                  <line x1="257" y1="145" x2="282" y2="122"/>
+                  <line x1="268" y1="160" x2="297" y2="149"/>
+                  <line x1="257" y1="176" x2="282" y2="191"/>
+                  <line x1="234" y1="186" x2="246" y2="214"/>
+                  <line x1="206" y1="189" x2="205" y2="218"/>
+                  <line x1="179" y1="183" x2="168" y2="210"/>
+                </g>
+              </g>
+              <g>
+                <path d="M55 157C62 121 93 100 127 98C154 97 168 111 166 130C165 149 148 168 117 176C93 182 69 178 55 157Z" fill="url(#skin)"/>
+                <ellipse cx="115" cy="110" rx="15" ry="20" fill="#cb9986"/>
+                <ellipse cx="112" cy="111" rx="10" ry="14" fill="#f1c6b3"/>
+                <ellipse cx="137" cy="118" rx="13" ry="17" fill="#d8a28d"/>
+                <ellipse cx="136" cy="119" rx="8" ry="12" fill="#f2c9b7"/>
+                <g class="blink">
+                  <ellipse cx="88" cy="136" rx="5.8" ry="6.4" fill="#231d1a"/>
+                  <ellipse cx="89.8" cy="134.2" rx="1.2" ry="1.2" fill="#fff"/>
+                </g>
+                <path d="M68 152C78 153 88 153 98 150" fill="none" stroke="#8d695c" stroke-width="2.1" stroke-linecap="round"/>
+                <g class="nose">
+                  <path d="M47 156C41 154 38 149 40 145C43 139 53 141 56 146C59 150 55 157 47 156Z" fill="#5c3f3a"/>
+                </g>
+                <g stroke="#b88673" stroke-linecap="round" stroke-width="1.6" opacity="0.95">
+                  <line x1="58" y1="149" x2="34" y2="146"/>
+                  <line x1="59" y1="153" x2="34" y2="158"/>
+                  <line x1="60" y1="157" x2="39" y2="169"/>
+                </g>
+                <path d="M129 172C122 182 113 190 104 194C103 184 108 176 117 170Z" fill="#c28e78"/>
+                <path d="M174 174C169 189 159 200 147 204C147 191 153 180 164 171Z" fill="#c28e78"/>
+                <path d="M118 194C118 202 114 208 106 211" fill="none" stroke="#684942" stroke-width="2" stroke-linecap="round"/>
+                <path d="M164 203C165 210 162 216 154 220" fill="none" stroke="#684942" stroke-width="2" stroke-linecap="round"/>
+              </g>
+              <ellipse cx="113" cy="209" rx="112" ry="12" fill="#d9c1bc" opacity="0.28"/>
+            </g>
+          </svg>
+        </div>
+        <div class="hero-label">
+          <div>
+            <div class="hero-name">ヒメハリテンレック</div>
+            <div class="species-copy">鼻先がすっと長めで、お耳がぴん。ごはんにこだわる本日の主役。</div>
+          </div>
+          <div class="hero-chip">ハリネズミとは別の動物</div>
+        </div>
+      </div>
+
+      <div class="card species-note">
+        <strong>このゲームの空気</strong>
+        <div class="small-text">
+          ゆるく待って、いいごはんが来たら食べるだけ。短く終わるのに、
+          「次はもうちょい粘れるかも」が残る軽いスコアアタックです。
+        </div>
+      </div>
+
+      <div class="card home-stats">
+        <div class="mini-stat">
+          <div class="small-text">ベストスコア</div>
+          <div id="homeBest" class="num">0</div>
+        </div>
+        <div class="mini-stat">
+          <div class="small-text">見つけたごちそう</div>
+          <div id="homeFound" class="num">0</div>
+        </div>
+      </div>
+
+      <div class="action-stack">
+        <button id="homeStartBtn" class="btn-primary" type="button">ごはん時間をはじめる</button>
+        <button id="homeCollectionBtn" class="btn-soft" type="button">見つけたごちそう一覧へ</button>
+        <button id="homeInfoBtn" class="btn-subtle" type="button">あそびかたと項目の説明</button>
+      </div>
+
+      <div class="footer-note">
+        片手でぽちぽち。待つか、食べるか。<br />
+        それだけなのに、ついもう1回。
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen section-gap">
+      <div class="topbar">
+        <button class="nav-btn" data-screen="home" type="button">ホーム</button>
+        <button class="nav-btn active" data-screen="game" type="button">ゲーム</button>
+        <button class="nav-btn" data-screen="collection" type="button">図鑑</button>
+        <button class="nav-btn" data-screen="info" type="button">説明</button>
+      </div>
+
+      <div id="gameStartCard" class="card start-card">
+        <h2 style="font-size:1.1rem;margin-bottom:8px;">まだ始まっていません</h2>
+        <p class="small-text" id="gameStartText">ボタンを押すと、45秒のごはん時間が始まります。</p>
+        <button id="gameMainStartBtn" class="btn-primary btn-inline" type="button" style="margin-top:12px;">スタート</button>
+      </div>
+
+      <div class="score-grid">
+        <div class="card score-card">
+          <div class="score-label">のこり</div>
+          <div id="timeNum" class="score-num">45</div>
+        </div>
+        <div class="card score-card">
+          <div class="score-label">スコア</div>
+          <div id="scoreNum" class="score-num">0</div>
+        </div>
+        <div class="card score-card">
+          <div class="score-label">ベスト</div>
+          <div id="bestNum" class="score-num">0</div>
+        </div>
+      </div>
+
+      <div class="status-grid">
+        <div class="card status-card">
+          <div class="status-label"><span>おなか</span><span id="hungerText">2 / 10</span></div>
+          <div class="meter"><div id="hungerFill" class="fill hunger"></div></div>
+        </div>
+        <div class="card status-card">
+          <div class="status-label"><span>飼い主さんの余裕</span><span id="ownerText">6 / 6</span></div>
+          <div class="meter"><div id="ownerFill" class="fill owner"></div></div>
+        </div>
+      </div>
+
+      <div class="card hero-card game-hero">
+        <div class="tenrec-stage">
+          <svg class="tenrec-ill" viewBox="0 0 360 250" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="bgGlow2" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#fff8eb"/>
+                <stop offset="100%" stop-color="#ffe6f1"/>
+              </linearGradient>
+              <linearGradient id="spineBase2" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#b28a64"/>
+                <stop offset="100%" stop-color="#7d604e"/>
+              </linearGradient>
+              <linearGradient id="spineTip2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f1e5c8"/>
+                <stop offset="100%" stop-color="#b48a62"/>
+              </linearGradient>
+              <linearGradient id="skin2" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#e8c4b0"/>
+                <stop offset="100%" stop-color="#c6917d"/>
+              </linearGradient>
+            </defs>
+            <ellipse cx="180" cy="130" rx="145" ry="88" fill="url(#bgGlow2)"/>
+            <g class="float">
+              <path d="M127 145C118 79 255 44 315 98C333 114 334 159 306 184C268 217 165 205 133 166Z" fill="url(#spineBase2)"/>
+              <g stroke="url(#spineTip2)" stroke-linecap="round" stroke-width="4.4">
+                <line x1="137" y1="141" x2="112" y2="96"/>
+                <line x1="152" y1="123" x2="137" y2="81"/>
+                <line x1="170" y1="113" x2="164" y2="72"/>
+                <line x1="190" y1="106" x2="192" y2="66"/>
+                <line x1="211" y1="103" x2="221" y2="63"/>
+                <line x1="231" y1="106" x2="249" y2="69"/>
+                <line x1="251" y1="113" x2="276" y2="80"/>
+                <line x1="271" y1="124" x2="301" y2="97"/>
+                <line x1="286" y1="140" x2="318" y2="123"/>
+                <line x1="291" y1="159" x2="324" y2="154"/>
+                <line x1="280" y1="177" x2="312" y2="188"/>
+                <line x1="260" y1="190" x2="285" y2="214"/>
+                <line x1="236" y1="197" x2="250" y2="229"/>
+                <line x1="210" y1="200" x2="212" y2="235"/>
+                <line x1="184" y1="198" x2="173" y2="231"/>
+                <line x1="161" y1="190" x2="140" y2="218"/>
+              </g>
+              <g stroke="#f1e4c8" stroke-linecap="round" stroke-width="2.1" opacity="0.95">
+                <line x1="151" y1="148" x2="132" y2="113"/>
+                <line x1="171" y1="134" x2="159" y2="99"/>
+                <line x1="191" y1="128" x2="188" y2="92"/>
+                <line x1="214" y1="128" x2="222" y2="93"/>
+                <line x1="237" y1="134" x2="252" y2="101"/>
+                <line x1="257" y1="145" x2="282" y2="122"/>
+                <line x1="268" y1="160" x2="297" y2="149"/>
+                <line x1="257" y1="176" x2="282" y2="191"/>
+                <line x1="234" y1="186" x2="246" y2="214"/>
+                <line x1="206" y1="189" x2="205" y2="218"/>
+                <line x1="179" y1="183" x2="168" y2="210"/>
+              </g>
+              <path d="M55 157C62 121 93 100 127 98C154 97 168 111 166 130C165 149 148 168 117 176C93 182 69 178 55 157Z" fill="url(#skin2)"/>
+              <ellipse cx="115" cy="110" rx="15" ry="20" fill="#cb9986"/>
+              <ellipse cx="112" cy="111" rx="10" ry="14" fill="#f1c6b3"/>
+              <ellipse cx="137" cy="118" rx="13" ry="17" fill="#d8a28d"/>
+              <ellipse cx="136" cy="119" rx="8" ry="12" fill="#f2c9b7"/>
+              <g class="blink">
+                <ellipse cx="88" cy="136" rx="5.8" ry="6.4" fill="#231d1a"/>
+                <ellipse cx="89.8" cy="134.2" rx="1.2" ry="1.2" fill="#fff"/>
+              </g>
+              <path d="M68 152C78 153 88 153 98 150" fill="none" stroke="#8d695c" stroke-width="2.1" stroke-linecap="round"/>
+              <g class="nose">
+                <path d="M47 156C41 154 38 149 40 145C43 139 53 141 56 146C59 150 55 157 47 156Z" fill="#5c3f3a"/>
+              </g>
+              <g stroke="#b88673" stroke-linecap="round" stroke-width="1.6" opacity="0.95">
+                <line x1="58" y1="149" x2="34" y2="146"/>
+                <line x1="59" y1="153" x2="34" y2="158"/>
+                <line x1="60" y1="157" x2="39" y2="169"/>
+              </g>
+              <path d="M129 172C122 182 113 190 104 194C103 184 108 176 117 170Z" fill="#c28e78"/>
+              <path d="M174 174C169 189 159 200 147 204C147 191 153 180 164 171Z" fill="#c28e78"/>
+              <path d="M118 194C118 202 114 208 106 211" fill="none" stroke="#684942" stroke-width="2" stroke-linecap="round"/>
+              <path d="M164 203C165 210 162 216 154 220" fill="none" stroke="#684942" stroke-width="2" stroke-linecap="round"/>
+              <ellipse cx="113" cy="209" rx="112" ry="12" fill="#d9c1bc" opacity="0.28"/>
+            </g>
+          </svg>
+        </div>
+        <div id="bubble" class="mood-bubble">今日は、どこまで待ってみようかな。まずは一皿見てみよう。</div>
+        <div id="offerCard" class="offer-card">
+          <div class="offer-head">
+            <div class="offer-label">いま出ているごはん</div>
+            <div id="rarityTag" class="rarity-tag">ふつう</div>
+          </div>
+          <div class="offer-main">
+            <div id="dishEmoji" class="dish-icon">🍓</div>
+            <div>
+              <div id="dishName" class="dish-name">やわらかミニいちご</div>
+              <div id="dishDesc" class="food-copy">ころんと甘くて食べやすい。悪くないけど、もっときらっとした一皿も期待してしまう。</div>
+              <div id="delish" class="delish">おいしさ <strong>3</strong></div>
+            </div>
+          </div>
+        </div>
+        <div class="control-grid">
+          <button id="waitBtn" class="btn-wait" type="button">もうちょい待つ</button>
+          <button id="eatBtn" class="btn-eat" type="button">いま食べる</button>
+        </div>
+      </div>
+
+      <div id="log" class="card log-card">
+        飼い主さん「はい、どうぞ」<br />
+        テンレック「さて……今日はどこまで粘ろうかな」
+      </div>
+    </section>
+
+    <section id="collectionScreen" class="screen section-gap">
+      <div class="topbar">
+        <button class="nav-btn" data-screen="home" type="button">ホーム</button>
+        <button class="nav-btn" data-screen="game" type="button">ゲーム</button>
+        <button class="nav-btn active" data-screen="collection" type="button">図鑑</button>
+        <button class="nav-btn" data-screen="info" type="button">説明</button>
+      </div>
+
+      <div class="card page-title">
+        <h2>見つけたごちそう一覧</h2>
+        <p class="small-text">見つけたごちそうを押すと、説明が見られます。まだ出会っていないものは？？？のままです。</p>
+      </div>
+
+      <div class="card panel">
+        <div class="hero-label" style="margin-top:0;">
+          <div class="hero-name">図鑑の進み具合</div>
+          <div class="hero-chip"><span id="collectionCount">0</span> / <span id="totalFoods">0</span></div>
+        </div>
+      </div>
+
+      <div id="collectionGrid" class="collection-grid"></div>
+    </section>
+
+    <section id="infoScreen" class="screen section-gap">
+      <div class="topbar">
+        <button class="nav-btn" data-screen="home" type="button">ホーム</button>
+        <button class="nav-btn" data-screen="game" type="button">ゲーム</button>
+        <button class="nav-btn" data-screen="collection" type="button">図鑑</button>
+        <button class="nav-btn active" data-screen="info" type="button">説明</button>
+      </div>
+
+      <div class="card page-title">
+        <h2>あそびかたと項目の説明</h2>
+        <p class="small-text">はじめる前にざっと確認したい人向けのページです。</p>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-card">
+          <h3>あそびかた</h3>
+          <div class="info-body">
+            毎回出てくるごはんを見て、<strong>いま食べる</strong>か、<strong>もうちょい待つ</strong>かを選びます。<br />
+            待つほど豪華なごちそうが出やすくなりますが、そのぶん空腹と飼い主さんの不安も増えます。
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>各項目の意味</h3>
+          <div class="info-list">
+            <div class="info-pill"><strong>のこり</strong>：1プレイの残り時間です。45秒でおしまい。</div>
+            <div class="info-pill"><strong>スコア</strong>：食べたごちそうのおいしさと、待ったぶんのボーナスが入ります。</div>
+            <div class="info-pill"><strong>おなか</strong>：待つほど増えます。いっぱいになると空腹で終了です。</div>
+            <div class="info-pill"><strong>飼い主さんの余裕</strong>：待たせるほど減ります。なくなると「具合が悪いんじゃ！？」と病院コースです。</div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>図鑑について</h3>
+          <div class="info-body">
+            食べたごちそうは図鑑に登録されます。図鑑ページでは、見つけたごちそうの説明をいつでも開けます。
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>この子について</h3>
+          <div class="info-body">
+            主役はヒメハリテンレック。ゲーム内のイラストは、鼻先が細長めで耳が目立つ感じに寄せつつ、
+            やわらかく可愛い空気になるように描いています。
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="resultOverlay" class="overlay" aria-hidden="true">
+    <div class="modal">
+      <h2 id="resultTitle" class="modal-title">おしまい</h2>
+      <div id="resultScore" class="result-score">0点</div>
+      <div id="resultText" class="modal-copy">今日のテンレックは、ほどよく待って、ちゃんとごちそうにありつきました。</div>
+      <div class="modal-actions">
+        <button id="retryBtn" class="btn-primary" type="button">もう1プレイ</button>
+        <button id="resultCollectionBtn" class="btn-soft" type="button">図鑑を見る</button>
+        <button id="resultHomeBtn" class="btn-subtle" type="button">ホームへ</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="foodOverlay" class="overlay" aria-hidden="true">
+    <div class="modal detail-card">
+      <div class="detail-head">
+        <div id="detailEmoji" class="detail-icon">🍓</div>
+        <div>
+          <h2 id="detailName" class="modal-title" style="font-size:1.15rem;margin-bottom:4px;">やわらかミニいちご</h2>
+          <div class="detail-meta">
+            <div id="detailRarity" class="detail-pill">ふつう</div>
+            <div id="detailScore" class="detail-pill">おいしさ 3</div>
+          </div>
+        </div>
+      </div>
+      <div id="detailDesc" class="modal-copy">ころんと甘くて食べやすい一皿です。</div>
+      <div id="detailHint" class="meta-line" style="margin-bottom:12px;color:var(--muted);">出会いやすさのメモ</div>
+      <div class="modal-actions">
+        <button id="detailCloseBtn" class="btn-primary" type="button">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const foods = [
+      { name: "香ばしペレット", emoji: "🥣", score: 1, rarity: "ふつう", desc: "いつもの安心メニュー。悪くないけど、胸はそこまで躍らない。", tier: 0, hint: "最初のほうで出やすい、定番のひと皿。" },
+      { name: "ふつうのコオロギ", emoji: "🦗", score: 2, rarity: "ふつう", desc: "サクッと食べられる定番。グルメ心には、ちょっと平熱。", tier: 0, hint: "待たなくても顔を出しやすい軽食。" },
+      { name: "ぬるめフルーツゼリー", emoji: "🍮", score: 3, rarity: "ふつう", desc: "ぷるっとやさしい。今日はこれでもいい気もする。", tier: 0, hint: "序盤で見かけやすい甘めの選択肢。" },
+      { name: "やわらかミニいちご", emoji: "🍓", score: 3, rarity: "ふつう", desc: "ころんと甘くて食べやすい。あと一声のごほうび感を夢見てしまう。", tier: 0, hint: "迷ったときにちょうどいい、ほどよい甘さ。" },
+      { name: "やさしいゆで卵", emoji: "🥚", score: 4, rarity: "なかなか", desc: "ほっくりした香り。堅実においしい、頼れる一皿。", tier: 1, hint: "ちょっと待つと見えやすくなる中堅ごはん。" },
+      { name: "しっとり鶏ささみ", emoji: "🍗", score: 6, rarity: "なかなか", desc: "うるっとやわらか。くちに入れたら、たぶん機嫌がよくなる。", tier: 1, hint: "待ちのごほうび感が出はじめるあたり。" },
+      { name: "はちみつバナナ", emoji: "🍌", score: 5, rarity: "なかなか", desc: "とろりと甘い。かわいげのある贅沢。", tier: 1, hint: "少し粘ると狙いやすい甘やかしメニュー。" },
+      { name: "つやつやマンゴー", emoji: "🥭", score: 7, rarity: "なかなか", desc: "南国みたいな香りがする。待った甲斐を感じるやつ。", tier: 1, hint: "待ちの流れがよいと、ひょいと出てきます。" },
+      { name: "ふわふわカステラかけら", emoji: "🍰", score: 7, rarity: "ごほうび", desc: "空気まで甘そうな、ほろりとしたひとかけ。", tier: 2, hint: "しっかり待ったご褒美ゾーン。" },
+      { name: "白身魚ほぐし", emoji: "🐟", score: 8, rarity: "ごほうび", desc: "しろく上品な香りが、鼻先でそっとほどける。", tier: 2, hint: "待ちボーナス狙いでうれしい一品。" },
+      { name: "ごほうびワーム盛り", emoji: "🍽️", score: 10, rarity: "ごほうび", desc: "テンレックの目がまるくなる盛り合わせ。待ちの勝利感がすごい。", tier: 2, hint: "粘りの気配が濃くなるほど期待できる皿。" },
+      { name: "きらきらフルーツプレート", emoji: "🍇", score: 11, rarity: "ごほうび", desc: "宝石みたいに並んだ果実。ゆるい午後が急に華やぐ。", tier: 2, hint: "中盤以降の夢が詰まったプレート。" },
+      { name: "とろけるプリン", emoji: "🍮", score: 9, rarity: "ごほうび", desc: "すべてをゆるす口どけ。ごきげんが丸くなる。", tier: 2, hint: "待ちたいけど危ない、その境目で光ることも。" },
+      { name: "王様ミックスプレート", emoji: "👑", score: 13, rarity: "きせき", desc: "今日は完全に勝ったな、という顔になれる特別皿。", tier: 3, hint: "かなり粘った先にちらっと見える大当たり。" },
+      { name: "ひみつの夜食セット", emoji: "🌙", score: 12, rarity: "きせき", desc: "飼い主さんのやさしさが詰まった、静かな大当たり。", tier: 3, hint: "めったに来ないけれど、来たら即ごきげん。" },
+      { name: "星くずむしプレート", emoji: "✨", score: 14, rarity: "きせき", desc: "もう今日は祝日みたいな顔になる、夢の一皿。", tier: 3, hint: "長く待っても毎回は会えない、図鑑映えの切り札。" }
+    ];
+
+    const state = {
+      timeLeft: 45,
+      score: 0,
+      best: Number(localStorage.getItem("tenrec_best_score") || 0),
+      hunger: 2,
+      owner: 6,
+      waitStreak: 0,
+      roundActive: false,
+      paused: false,
+      currentOffer: null,
+      timerId: null,
+      actionLock: false,
+      currentScreen: "home",
+      discovered: JSON.parse(localStorage.getItem("tenrec_discovered") || "[]")
+    };
+
+    const el = {
+      homeScreen: document.getElementById("homeScreen"),
+      gameScreen: document.getElementById("gameScreen"),
+      collectionScreen: document.getElementById("collectionScreen"),
+      infoScreen: document.getElementById("infoScreen"),
+      homeBest: document.getElementById("homeBest"),
+      homeFound: document.getElementById("homeFound"),
+      timeNum: document.getElementById("timeNum"),
+      scoreNum: document.getElementById("scoreNum"),
+      bestNum: document.getElementById("bestNum"),
+      hungerText: document.getElementById("hungerText"),
+      ownerText: document.getElementById("ownerText"),
+      hungerFill: document.getElementById("hungerFill"),
+      ownerFill: document.getElementById("ownerFill"),
+      bubble: document.getElementById("bubble"),
+      dishEmoji: document.getElementById("dishEmoji"),
+      dishName: document.getElementById("dishName"),
+      dishDesc: document.getElementById("dishDesc"),
+      rarityTag: document.getElementById("rarityTag"),
+      delish: document.getElementById("delish"),
+      waitBtn: document.getElementById("waitBtn"),
+      eatBtn: document.getElementById("eatBtn"),
+      log: document.getElementById("log"),
+      offerCard: document.getElementById("offerCard"),
+      collectionGrid: document.getElementById("collectionGrid"),
+      collectionCount: document.getElementById("collectionCount"),
+      totalFoods: document.getElementById("totalFoods"),
+      resultOverlay: document.getElementById("resultOverlay"),
+      resultTitle: document.getElementById("resultTitle"),
+      resultScore: document.getElementById("resultScore"),
+      resultText: document.getElementById("resultText"),
+      retryBtn: document.getElementById("retryBtn"),
+      resultCollectionBtn: document.getElementById("resultCollectionBtn"),
+      resultHomeBtn: document.getElementById("resultHomeBtn"),
+      foodOverlay: document.getElementById("foodOverlay"),
+      detailEmoji: document.getElementById("detailEmoji"),
+      detailName: document.getElementById("detailName"),
+      detailRarity: document.getElementById("detailRarity"),
+      detailScore: document.getElementById("detailScore"),
+      detailDesc: document.getElementById("detailDesc"),
+      detailHint: document.getElementById("detailHint"),
+      detailCloseBtn: document.getElementById("detailCloseBtn"),
+      gameStartCard: document.getElementById("gameStartCard"),
+      gameStartText: document.getElementById("gameStartText"),
+      gameMainStartBtn: document.getElementById("gameMainStartBtn"),
+      homeStartBtn: document.getElementById("homeStartBtn"),
+      homeCollectionBtn: document.getElementById("homeCollectionBtn"),
+      homeInfoBtn: document.getElementById("homeInfoBtn"),
+      navBtns: Array.from(document.querySelectorAll(".nav-btn"))
+    };
+
+    const bubbleWait = [
+      "まだいける。次、ちょっとすごいの来ないかな。",
+      "この流れ、飼い主さんが気を利かせてくれる気がする。",
+      "ぼく、ちゃんと学習してるからね。待つといいのが来るんだよね。",
+      "むむ……この静かな期待感、きらいじゃない。",
+      "いまも悪くないけど、夢を見るならもう一歩。",
+      "鼻先が言ってる。もう少し待てって。"
+    ];
+
+    const bubbleEat = [
+      "よし、ここだ。いただきます。",
+      "うん、今日はこのおいしさで着地。",
+      "待つのもいいけど、食べどきってあるよね。",
+      "この一口で機嫌がまるくなるやつ。",
+      "あ、これは逃したくない。ぱくっといく。"
+    ];
+
+    const ownerRelaxed = [
+      "飼い主さん「じゃあ、別のも見てみる？」",
+      "飼い主さん「えっ、それじゃないの？ はーい、次いくよー」",
+      "飼い主さん「グルメだなあ。じゃ、もう一皿だけ」",
+      "飼い主さん「また待つの？ でもかわいいから出しちゃう」",
+      "飼い主さん「なるほど、今日は厳しめ審査だね」",
+      "飼い主さん「はいはい、もっと良いやつ探してきますよっと」"
+    ];
+
+    const ownerTired = [
+      "飼い主さん「うーん、まだ違う？ けっこう選ぶねえ」",
+      "飼い主さん「え、これも違うの？ もうちょっとだけね」",
+      "飼い主さん「好みが細かい日だ……でも、次でどう？」",
+      "飼い主さん「そんな顔されると探しに行っちゃうなあ」",
+      "飼い主さん「ちょっと心配になってきたけど、もう一回だけ」"
+    ];
+
+    const ownerConcerned = [
+      "飼い主さん「えっ、まだ食べないの？ なんか変かな？」",
+      "飼い主さん「いつもより慎重すぎない？ だいじょうぶ？」",
+      "飼い主さん「好き嫌いというより、体調……？」",
+      "飼い主さん「うーん、ちょっと様子がおかしい気がする」"
+    ];
+
+    const ownerEatReactions = [
+      "飼い主さん「よかった、ちゃんと食べた〜」",
+      "飼い主さん「その顔！ それは当たりだったね」",
+      "飼い主さん「はいはい、今日はそれが正解ね」",
+      "飼い主さん「いい食べっぷり。見てるこっちもうれしい」",
+      "飼い主さん「おっ、やっとお気に召したらしい」"
+    ];
+
+    function pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function clamp(num, min, max) {
+      return Math.max(min, Math.min(max, num));
+    }
+
+    function uniqueDiscovered() {
+      return [...new Set(state.discovered)];
+    }
+
+    function savePersistent() {
+      localStorage.setItem("tenrec_best_score", String(state.best));
+      localStorage.setItem("tenrec_discovered", JSON.stringify(uniqueDiscovered()));
+    }
+
+    function chooseFood() {
+      let common = 0.62;
+      let uncommon = 0.24;
+      let reward = 0.10;
+      let miracle = 0.04;
+
+      common -= state.waitStreak * 0.085;
+      uncommon += state.waitStreak * 0.035;
+      reward += state.waitStreak * 0.032;
+      miracle += state.waitStreak * 0.018;
+
+      if (state.owner <= 2.2) {
+        reward -= 0.05;
+        miracle -= 0.025;
+        common += 0.06;
+      }
+
+      if (state.hunger >= 7.5) {
+        reward += 0.03;
+        miracle += 0.02;
+        common -= 0.03;
+      }
+
+      common = clamp(common, 0.18, 0.76);
+      uncommon = clamp(uncommon, 0.1, 0.45);
+      reward = clamp(reward, 0.06, 0.34);
+      miracle = clamp(miracle, 0.01, 0.16);
+
+      const total = common + uncommon + reward + miracle;
+      const roll = Math.random() * total;
+      let tier = 0;
+
+      if (roll < common) tier = 0;
+      else if (roll < common + uncommon) tier = 1;
+      else if (roll < common + uncommon + reward) tier = 2;
+      else tier = 3;
+
+      const pool = foods.filter(food => food.tier === tier);
+      return { ...pick(pool) };
+    }
+
+    function setLog(lines) {
+      el.log.innerHTML = lines.join("<br />");
+    }
+
+    function pulseOffer() {
+      el.offerCard.classList.remove("sparkle");
+      void el.offerCard.offsetWidth;
+      el.offerCard.classList.add("sparkle");
+    }
+
+    function renderOffer() {
+      const food = state.currentOffer;
+      if (!food) return;
+      el.dishEmoji.textContent = food.emoji;
+      el.dishName.textContent = food.name;
+      el.dishDesc.textContent = food.desc;
+      el.rarityTag.textContent = food.rarity;
+      el.delish.innerHTML = `おいしさ <strong>${food.score}</strong>`;
+      pulseOffer();
+    }
+
+    function renderHomeStats() {
+      el.homeBest.textContent = state.best;
+      el.homeFound.textContent = uniqueDiscovered().length;
+    }
+
+    function renderCollection() {
+      el.totalFoods.textContent = foods.length;
+      const discovered = uniqueDiscovered();
+      el.collectionCount.textContent = discovered.length;
+
+      el.collectionGrid.innerHTML = foods.map(food => {
+        const unlocked = discovered.includes(food.name);
+        return `
+          <button class="food-tile ${unlocked ? "" : "locked"}" type="button" data-food="${food.name.replace(/"/g, "&quot;")}" ${unlocked ? "" : "data-locked=\"true\""}>
+            <div class="food-topline">
+              <div class="food-emoji">${unlocked ? food.emoji : "❔"}</div>
+              <div class="detail-pill">${unlocked ? food.rarity : "みはっけん"}</div>
+            </div>
+            <div>
+              <div class="food-name">${unlocked ? food.name : "？？？"}</div>
+              <div class="food-meta">${unlocked ? `おいしさ ${food.score}` : "まだ出会っていません"}</div>
+            </div>
+            <div class="food-hint">${unlocked ? "押すと説明が見られます" : "まずはゲームで見つけよう"}</div>
+          </button>
+        `;
+      }).join("");
+
+      Array.from(el.collectionGrid.querySelectorAll(".food-tile")).forEach(btn => {
+        btn.addEventListener("click", () => {
+          if (btn.dataset.locked === "true") return;
+          openFoodDetail(btn.dataset.food);
+        }, { passive: true });
+      });
+    }
+
+    function renderStatus() {
+      el.timeNum.textContent = Math.max(0, Math.ceil(state.timeLeft));
+      el.scoreNum.textContent = state.score;
+      el.bestNum.textContent = state.best;
+      el.hungerText.textContent = `${state.hunger.toFixed(1)} / 10`;
+      el.ownerText.textContent = `${state.owner.toFixed(1)} / 6`;
+      el.hungerFill.style.width = `${clamp(state.hunger / 10, 0, 1) * 100}%`;
+      el.ownerFill.style.width = `${clamp(state.owner / 6, 0, 1) * 100}%`;
+      const canAct = state.roundActive && !state.paused && !state.actionLock;
+      el.waitBtn.disabled = !canAct;
+      el.eatBtn.disabled = !canAct;
+
+      if (!state.roundActive) {
+        el.gameStartCard.style.display = "block";
+        el.gameMainStartBtn.textContent = "スタート";
+        el.gameStartText.textContent = "ボタンを押すと、45秒のごはん時間が始まります。";
+      } else if (state.paused) {
+        el.gameStartCard.style.display = "block";
+        el.gameMainStartBtn.textContent = "ゲームを再開";
+        el.gameStartText.textContent = "いまは一時停止中です。再開すると続きから始まります。";
+      } else {
+        el.gameStartCard.style.display = "none";
+      }
+    }
+
+    function updateAllNav(screen) {
+      el.navBtns.forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.screen === screen);
+      });
+    }
+
+    function startTimer() {
+      clearInterval(state.timerId);
+      state.timerId = setInterval(tick, 250);
+    }
+
+    function pauseGame() {
+      if (!state.roundActive || state.paused) return;
+      state.paused = true;
+      clearInterval(state.timerId);
+      state.timerId = null;
+      renderStatus();
+    }
+
+    function resumeGame() {
+      if (!state.roundActive || !state.paused) return;
+      state.paused = false;
+      startTimer();
+      renderStatus();
+    }
+
+    function showScreen(screen) {
+      if (state.currentScreen === "game" && screen !== "game") {
+        pauseGame();
+      }
+
+      state.currentScreen = screen;
+      el.homeScreen.classList.toggle("active", screen === "home");
+      el.gameScreen.classList.toggle("active", screen === "game");
+      el.collectionScreen.classList.toggle("active", screen === "collection");
+      el.infoScreen.classList.toggle("active", screen === "info");
+      updateAllNav(screen);
+
+      if (screen === "collection") renderCollection();
+      if (screen === "home") renderHomeStats();
+      if (screen === "game") renderStatus();
+    }
+
+    function newOffer(customBubble) {
+      state.currentOffer = chooseFood();
+      renderOffer();
+      el.bubble.textContent = customBubble || `これ、${state.currentOffer.name}かあ……どうしよう。`;
+      renderStatus();
+    }
+
+    function lockBriefly(cb) {
+      state.actionLock = true;
+      renderStatus();
+      setTimeout(() => {
+        cb();
+        state.actionLock = false;
+        renderStatus();
+      }, 340);
+    }
+
+    function ownerReactionLine() {
+      if (state.owner > 3.4) return pick(ownerRelaxed);
+      if (state.owner > 1.4) return pick(ownerTired);
+      return pick(ownerConcerned);
+    }
+
+    function eatFood() {
+      if (!state.roundActive || state.paused || state.actionLock) return;
+      const food = state.currentOffer;
+      const bonus = Math.min(8, state.waitStreak * 2);
+      const gained = food.score + bonus;
+      state.score += gained;
+      state.hunger = clamp(state.hunger - 1.8, 0, 10);
+      state.owner = clamp(state.owner + 0.7, 0, 6);
+      state.waitStreak = 0;
+      state.discovered.push(food.name);
+      if (state.score > state.best) state.best = state.score;
+      savePersistent();
+      setLog([
+        pick(bubbleEat),
+        `テンレックは <strong>${food.name}</strong> をぱくり。 +${gained}点${bonus ? `（待ちボーナス +${bonus}）` : ""}`,
+        pick(ownerEatReactions)
+      ]);
+      el.bubble.textContent = pick(bubbleEat);
+      renderCollection();
+      renderHomeStats();
+      renderStatus();
+      lockBriefly(() => newOffer("ふむ。次はどうする？"));
+    }
+
+    function waitFood() {
+      if (!state.roundActive || state.paused || state.actionLock) return;
+      state.waitStreak += 1;
+      state.hunger = clamp(state.hunger + 1.2, 0, 10);
+      state.owner = clamp(state.owner - 0.9, 0, 6);
+      const line = ownerReactionLine();
+      setLog([
+        "テンレック「うーん、まだ待つ」",
+        line,
+        `待ちレベル ${state.waitStreak}。次のごはんがちょっと豪華になりやすい。`
+      ]);
+      el.bubble.textContent = pick(bubbleWait);
+      renderStatus();
+
+      if (state.owner <= 0) {
+        endGame("clinic");
+        return;
+      }
+      if (state.hunger >= 10) {
+        endGame("hunger");
+        return;
+      }
+
+      lockBriefly(() => newOffer(pick(bubbleWait)));
+    }
+
+    function tick() {
+      if (!state.roundActive || state.paused) return;
+      state.timeLeft = Math.max(0, state.timeLeft - 0.25);
+
+      if (Math.floor(state.timeLeft * 4) % 16 === 0) {
+        state.hunger = clamp(state.hunger + 0.15, 0, 10);
+      }
+
+      if (state.hunger >= 10) {
+        endGame("hunger");
+        return;
+      }
+      if (state.timeLeft <= 0) {
+        endGame("time");
+        return;
+      }
+
+      if (state.owner <= 1.2) {
+        el.bubble.textContent = "あれ、飼い主さんの空気がそわそわしてる……でも、もう一声あるかも。";
+      } else if (state.hunger >= 8) {
+        el.bubble.textContent = "おなかはすいてきた……でも、まだ夢を見たい。";
+      }
+      renderStatus();
+    }
+
+    function endGame(reason) {
+      if (!state.roundActive) return;
+      state.roundActive = false;
+      state.paused = false;
+      clearInterval(state.timerId);
+      state.timerId = null;
+      if (state.score > state.best) state.best = state.score;
+      savePersistent();
+      renderStatus();
+      renderCollection();
+      renderHomeStats();
+
+      let title = "45秒のグルメ時間、おわり";
+      let text = "あっという間のひと区切り。もう1回やると、次はもっと欲が出ます。";
+
+      if (reason === "clinic") {
+        title = "動物病院へつれていかれた";
+        text = "飼い主さん「えっ、ずっと食べない……具合が悪いんじゃ！？」<br />あわててキャリーに入れられて、そのまま動物病院コース。待ちすぎ注意です。";
+      } else if (reason === "hunger") {
+        title = "おなかが限界";
+        text = "さすがに空腹が勝ちました。次はもう少し早めに食べると、もっと安定して伸ばせます。";
+      }
+
+      el.resultTitle.textContent = title;
+      el.resultScore.textContent = `${state.score}点`;
+      el.resultText.innerHTML = `${text}<br />見つけたごちそう: <strong>${uniqueDiscovered().length}</strong> / ${foods.length}`;
+      el.resultOverlay.classList.add("show");
+      el.resultOverlay.setAttribute("aria-hidden", "false");
+      showScreen("game");
+    }
+
+    function closeResultOverlay() {
+      el.resultOverlay.classList.remove("show");
+      el.resultOverlay.setAttribute("aria-hidden", "true");
+    }
+
+    function openFoodDetail(foodName) {
+      const food = foods.find(item => item.name === foodName);
+      if (!food) return;
+      el.detailEmoji.textContent = food.emoji;
+      el.detailName.textContent = food.name;
+      el.detailRarity.textContent = food.rarity;
+      el.detailScore.textContent = `おいしさ ${food.score}`;
+      el.detailDesc.textContent = food.desc;
+      el.detailHint.textContent = food.hint;
+      el.foodOverlay.classList.add("show");
+      el.foodOverlay.setAttribute("aria-hidden", "false");
+    }
+
+    function closeFoodDetail() {
+      el.foodOverlay.classList.remove("show");
+      el.foodOverlay.setAttribute("aria-hidden", "true");
+    }
+
+    function startGame() {
+      closeResultOverlay();
+      state.timeLeft = 45;
+      state.score = 0;
+      state.hunger = 2;
+      state.owner = 6;
+      state.waitStreak = 0;
+      state.roundActive = true;
+      state.paused = false;
+      state.actionLock = false;
+      setLog([
+        "飼い主さん「はい、どうぞ」",
+        "テンレック「さて……今日はどこまで粘ろうかな」"
+      ]);
+      newOffer("まずは一皿。ここからどう転ぶかな。");
+      renderStatus();
+      renderHomeStats();
+      startTimer();
+      showScreen("game");
+    }
+
+    function init() {
+      renderCollection();
+      renderHomeStats();
+      renderStatus();
+      showScreen("home");
+    }
+
+    el.waitBtn.addEventListener("click", waitFood, { passive: true });
+    el.eatBtn.addEventListener("click", eatFood, { passive: true });
+    el.retryBtn.addEventListener("click", startGame, { passive: true });
+    el.gameMainStartBtn.addEventListener("click", () => {
+      if (state.roundActive && state.paused) {
+        resumeGame();
+      } else {
+        startGame();
+      }
+    }, { passive: true });
+    el.homeStartBtn.addEventListener("click", startGame, { passive: true });
+    el.homeCollectionBtn.addEventListener("click", () => showScreen("collection"), { passive: true });
+    el.homeInfoBtn.addEventListener("click", () => showScreen("info"), { passive: true });
+    el.resultCollectionBtn.addEventListener("click", () => {
+      closeResultOverlay();
+      showScreen("collection");
+    }, { passive: true });
+    el.resultHomeBtn.addEventListener("click", () => {
+      closeResultOverlay();
+      showScreen("home");
+    }, { passive: true });
+    el.detailCloseBtn.addEventListener("click", closeFoodDetail, { passive: true });
+
+    el.navBtns.forEach(btn => {
+      btn.addEventListener("click", () => showScreen(btn.dataset.screen), { passive: true });
+    });
+
+    el.resultOverlay.addEventListener("click", (event) => {
+      if (event.target === el.resultOverlay) closeResultOverlay();
+    });
+    el.foodOverlay.addEventListener("click", (event) => {
+      if (event.target === el.foodOverlay) closeFoodDetail();
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) pauseGame();
+    });
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1017 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>やさい畑だけ牧場</title>
+<style>
+  :root{
+    --bg:#1b2b34;
+    --panel:#f4e5b8;
+    --panel2:#fff2c9;
+    --ink:#2b1d12;
+    --line:#5c3b20;
+    --accent:#2f7f4f;
+    --danger:#a33a2c;
+    --blue:#3f6fa8;
+    --shadow:#00000055;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0;
+    min-height:100%;
+    background:linear-gradient(#223946,#16252d);
+    color:var(--ink);
+    font-family: ui-monospace, Menlo, Consolas, "Hiragino Sans", "Hiragino Kaku Gothic ProN", monospace;
+    touch-action:manipulation;
+  }
+  body{
+    display:flex;
+    justify-content:center;
+    padding: env(safe-area-inset-top) 8px env(safe-area-inset-bottom);
+  }
+  #app{
+    width:100%;
+    max-width:430px;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .title{
+    color:#ffe9a8;
+    text-shadow:2px 2px 0 #000;
+    text-align:center;
+    font-weight:900;
+    letter-spacing:.08em;
+    font-size:22px;
+    padding:8px 0 0;
+  }
+  .status{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+  }
+  .box{
+    background:var(--panel);
+    border:3px solid var(--line);
+    box-shadow:4px 4px 0 var(--shadow);
+    border-radius:6px;
+    padding:8px;
+  }
+  .box.small{
+    font-size:13px;
+    line-height:1.45;
+  }
+  .barwrap{
+    height:18px;
+    border:2px solid var(--line);
+    background:#7b4f2d;
+    position:relative;
+    margin-top:4px;
+  }
+  .bar{
+    height:100%;
+    background:linear-gradient(90deg,#5bd06b,#e6d64c);
+    width:100%;
+  }
+  .bartext{
+    position:absolute;
+    inset:0;
+    text-align:center;
+    font-size:12px;
+    line-height:15px;
+    color:#1d130d;
+    font-weight:bold;
+    text-shadow:1px 1px 0 #fff8;
+  }
+  #farmCanvas{
+    width:100%;
+    aspect-ratio:360/430;
+    background:#6cbf5f;
+    border:4px solid #2b1d12;
+    border-radius:8px;
+    box-shadow:5px 5px 0 var(--shadow);
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    display:block;
+  }
+  .tools{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:5px;
+  }
+  button, select, textarea, input{
+    font:inherit;
+  }
+  button{
+    min-height:42px;
+    border:3px solid var(--line);
+    background:var(--panel2);
+    color:var(--ink);
+    border-radius:6px;
+    box-shadow:3px 3px 0 var(--shadow);
+    font-weight:900;
+    cursor:pointer;
+  }
+  button:active{
+    transform:translate(2px,2px);
+    box-shadow:1px 1px 0 var(--shadow);
+  }
+  button.selected{
+    background:#ffe071;
+    outline:3px solid #fff7b0;
+  }
+  button.primary{
+    background:#95d67c;
+  }
+  button.blue{
+    background:#a8d3ff;
+  }
+  button.red{
+    background:#ffb0a8;
+  }
+  button:disabled{
+    filter:grayscale(.85);
+    opacity:.6;
+  }
+  .menu{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:6px;
+  }
+  .panel{
+    display:none;
+    position:fixed;
+    inset:0;
+    padding:calc(env(safe-area-inset-top) + 10px) 10px calc(env(safe-area-inset-bottom) + 10px);
+    background:#0009;
+    z-index:10;
+    overflow:auto;
+  }
+  .panel.open{
+    display:block;
+  }
+  .panelInner{
+    max-width:430px;
+    margin:0 auto;
+    background:var(--panel);
+    border:4px solid var(--line);
+    border-radius:10px;
+    padding:12px;
+    box-shadow:6px 6px 0 #0008;
+  }
+  .panel h2{
+    margin:0 0 10px;
+    font-size:20px;
+  }
+  .cards{
+    display:grid;
+    gap:8px;
+  }
+  .card{
+    background:var(--panel2);
+    border:3px solid var(--line);
+    border-radius:8px;
+    padding:10px;
+  }
+  .cardTop{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    align-items:flex-start;
+    margin-bottom:8px;
+  }
+  .cardName{
+    font-weight:900;
+    font-size:18px;
+  }
+  .cardDesc{
+    font-size:13px;
+    line-height:1.5;
+  }
+  .rowButtons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+    margin-top:8px;
+  }
+  .seedSelect{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:6px;
+  }
+  select{
+    min-height:42px;
+    width:100%;
+    border:3px solid var(--line);
+    background:var(--panel2);
+    color:var(--ink);
+    border-radius:6px;
+    padding:6px;
+    font-weight:800;
+  }
+  .log{
+    min-height:48px;
+    max-height:78px;
+    overflow:auto;
+    font-size:12px;
+    line-height:1.45;
+    background:#fff8d6;
+    border:3px solid var(--line);
+    border-radius:6px;
+    padding:6px;
+  }
+  textarea{
+    width:100%;
+    min-height:130px;
+    resize:vertical;
+    border:3px solid var(--line);
+    border-radius:6px;
+    background:#fff8d6;
+    color:var(--ink);
+    padding:8px;
+    font-size:12px;
+  }
+  .note{
+    font-size:12px;
+    line-height:1.55;
+    color:#4e3522;
+  }
+  .summaryTable{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff8d6;
+    border:3px solid var(--line);
+    margin:8px 0;
+  }
+  .summaryTable th,.summaryTable td{
+    border:2px solid var(--line);
+    padding:6px;
+    text-align:left;
+    font-size:13px;
+  }
+  .summaryTable td:last-child{
+    text-align:right;
+    font-weight:900;
+  }
+  .two{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+  }
+  .footerPad{height:8px;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="title">やさい畑だけ牧場</div>
+
+  <div class="status">
+    <div class="box small" id="dateMoney"></div>
+    <div class="box small">
+      体力
+      <div class="barwrap"><div class="bar" id="staminaBar"></div><div class="bartext" id="staminaText"></div></div>
+    </div>
+  </div>
+
+  <canvas id="farmCanvas" width="360" height="430" aria-label="牧場の畑"></canvas>
+
+  <div class="box">
+    <div class="tools">
+      <button id="toolTill" data-tool="till">耕す</button>
+      <button id="toolPlant" data-tool="plant">種まき</button>
+      <button id="toolWater" data-tool="water">水やり</button>
+      <button id="toolHarvest" data-tool="harvest">収穫</button>
+      <button id="toolClear" data-tool="clear">片付け</button>
+    </div>
+    <div class="seedSelect" style="margin-top:8px;">
+      <select id="seedSelect"></select>
+    </div>
+  </div>
+
+  <div class="menu">
+    <button class="primary" id="nextDayBtn">翌日へ</button>
+    <button id="shopBtn">種屋</button>
+    <button id="restBtn">食堂</button>
+    <button class="blue" id="saveBtn">セーブ</button>
+  </div>
+
+  <div class="log" id="log"></div>
+  <div class="footerPad"></div>
+</div>
+
+<div class="panel" id="shopPanel">
+  <div class="panelInner">
+    <h2>タネを扱うお店</h2>
+    <p class="note">今の月に育つ野菜のタネだけ売っています。買ったタネは「種まき」で使えます。</p>
+    <div class="cards" id="shopCards"></div>
+    <div style="height:10px;"></div>
+    <button id="closeShop" class="blue" style="width:100%;">畑へ戻る</button>
+  </div>
+</div>
+
+<div class="panel" id="restPanel">
+  <div class="panelInner">
+    <h2>レストラン</h2>
+    <p class="note">食事をすると体力が回復します。月末の収支では食事代として表示されます。</p>
+    <div class="cards" id="restCards"></div>
+    <div style="height:10px;"></div>
+    <button id="closeRest" class="blue" style="width:100%;">畑へ戻る</button>
+  </div>
+</div>
+
+<div class="panel" id="savePanel">
+  <div class="panelInner">
+    <h2>セーブコード</h2>
+    <p class="note">保存したい時は「コード作成」を押して、出た文字列をメモにコピーしてください。再開する時は貼り付けて「読み込み」を押します。</p>
+    <textarea id="saveText" placeholder="ここにセーブコードが出ます／読み込みたいコードを貼ります"></textarea>
+    <div class="two" style="margin-top:8px;">
+      <button id="makeSave" class="primary">コード作成</button>
+      <button id="loadSave" class="red">読み込み</button>
+    </div>
+    <div style="height:8px;"></div>
+    <button id="closeSave" class="blue" style="width:100%;">畑へ戻る</button>
+  </div>
+</div>
+
+<div class="panel" id="monthPanel">
+  <div class="panelInner">
+    <h2 id="monthTitle">月末収支</h2>
+    <div id="monthBody"></div>
+    <button id="closeMonth" class="primary" style="width:100%;">次の月を始める</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const CROPS = {
+    turnip:   {name:"かぶ",       season:0, grow:3, seed:40,  sell:90,  color:"#f6f2d2", top:"#77c95e"},
+    potato:   {name:"じゃがいも", season:0, grow:4, seed:55,  sell:130, color:"#c99552", top:"#5faa4a"},
+    cabbage:  {name:"キャベツ",   season:0, grow:6, seed:90,  sell:230, color:"#82d47b", top:"#4b9f4b"},
+
+    tomato:   {name:"トマト",     season:1, grow:4, seed:70,  sell:170, color:"#d94132", top:"#4fab56"},
+    corn:     {name:"とうもろこし", season:1, grow:6, seed:110, sell:280, color:"#f0c843", top:"#519c4b"},
+    cucumber: {name:"きゅうり",   season:1, grow:4, seed:65,  sell:160, color:"#3ba658", top:"#4fab56"},
+
+    carrot:   {name:"にんじん",   season:2, grow:4, seed:70,  sell:175, color:"#e6782f", top:"#57b85d"},
+    sweet:    {name:"さつまいも", season:2, grow:5, seed:80,  sell:210, color:"#a44773", top:"#5fad4e"},
+    pumpkin:  {name:"かぼちゃ",   season:2, grow:7, seed:130, sell:360, color:"#e8872e", top:"#5a9a45"},
+
+    daikon:   {name:"だいこん",   season:3, grow:4, seed:65,  sell:155, color:"#f3f0df", top:"#4dac66"},
+    spinach:  {name:"ほうれん草", season:3, grow:3, seed:50,  sell:120, color:"#2d9348", top:"#2d9348"},
+    hakusai:  {name:"はくさい",   season:3, grow:6, seed:95,  sell:250, color:"#cce6a8", top:"#6eb35a"}
+  };
+
+  const MONTHS = ["春の月","夏の月","秋の月","冬の月"];
+  const COST = {till:5, plant:3, water:2, harvest:4, clear:4};
+  const COLS = 4, ROWS = 5, CELL_COUNT = COLS * ROWS;
+  const CELL_W = 72, CELL_H = 58, GAP = 8, START_X = 20, START_Y = 40;
+
+  const canvas = document.getElementById("farmCanvas");
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
+
+  const el = {
+    dateMoney: document.getElementById("dateMoney"),
+    staminaBar: document.getElementById("staminaBar"),
+    staminaText: document.getElementById("staminaText"),
+    log: document.getElementById("log"),
+    seedSelect: document.getElementById("seedSelect"),
+    shopCards: document.getElementById("shopCards"),
+    restCards: document.getElementById("restCards"),
+    shopPanel: document.getElementById("shopPanel"),
+    restPanel: document.getElementById("restPanel"),
+    savePanel: document.getElementById("savePanel"),
+    monthPanel: document.getElementById("monthPanel"),
+    monthTitle: document.getElementById("monthTitle"),
+    monthBody: document.getElementById("monthBody"),
+    saveText: document.getElementById("saveText")
+  };
+
+  let state = newGame();
+
+  function newGame(){
+    return {
+      version: 1,
+      year: 1,
+      month: 0,
+      day: 1,
+      money: 1000,
+      stamina: 100,
+      maxStamina: 100,
+      selectedTool: "till",
+      selectedSeed: "turnip",
+      seeds: {},
+      field: Array.from({length:CELL_COUNT}, () => ({
+        tilled:false,
+        crop:null,
+        watered:false
+      })),
+      stats: {
+        income:0,
+        seedExpense:0,
+        restaurantExpense:0,
+        shipped:{}
+      },
+      log:["牧場生活が始まった。まずは畑を耕そう。"]
+    };
+  }
+
+  function currentSeason(){ return state.month % 4; }
+  function currentMonthName(){ return MONTHS[currentSeason()]; }
+  function seasonCropIds(){
+    return Object.keys(CROPS).filter(id => CROPS[id].season === currentSeason());
+  }
+  function moneyText(n){ return Number(n).toLocaleString("ja-JP") + "G"; }
+
+  function log(msg){
+    state.log.unshift(msg);
+    state.log = state.log.slice(0, 8);
+    render();
+  }
+
+  function hasStamina(cost){
+    if(state.stamina < cost){
+      log("体力が足りない。食堂で回復するか、翌日に進もう。");
+      return false;
+    }
+    return true;
+  }
+
+  function spendStamina(cost){
+    state.stamina = Math.max(0, state.stamina - cost);
+  }
+
+  function render(){
+    renderStatus();
+    renderTools();
+    renderSeeds();
+    renderFarm();
+    renderLog();
+  }
+
+  function renderStatus(){
+    el.dateMoney.innerHTML =
+      `年：${state.year}年目<br>` +
+      `月日：${currentMonthName()} ${state.day}/30<br>` +
+      `所持金：${moneyText(state.money)}`;
+    const pct = Math.max(0, Math.min(100, Math.round(state.stamina / state.maxStamina * 100)));
+    el.staminaBar.style.width = pct + "%";
+    el.staminaText.textContent = `${state.stamina}/${state.maxStamina}`;
+  }
+
+  function renderTools(){
+    document.querySelectorAll("[data-tool]").forEach(btn => {
+      btn.classList.toggle("selected", btn.dataset.tool === state.selectedTool);
+    });
+  }
+
+  function renderSeeds(){
+    const ids = seasonCropIds();
+    if(!ids.includes(state.selectedSeed)) state.selectedSeed = ids[0];
+
+    el.seedSelect.innerHTML = "";
+    ids.forEach(id => {
+      const c = CROPS[id];
+      const opt = document.createElement("option");
+      opt.value = id;
+      opt.textContent = `${c.name}のタネ：${state.seeds[id] || 0}個 / ${c.grow}日 / 出荷${c.sell}G`;
+      el.seedSelect.appendChild(opt);
+    });
+    el.seedSelect.value = state.selectedSeed;
+  }
+
+  function renderLog(){
+    el.log.innerHTML = state.log.map(x => "・" + escapeHtml(x)).join("<br>");
+  }
+
+  function renderFarm(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // grass background
+    ctx.fillStyle = "#65b95d";
+    ctx.fillRect(0,0,360,430);
+    for(let y=0;y<430;y+=16){
+      for(let x=(y%32===0?0:8);x<360;x+=32){
+        ctx.fillStyle = "#78ca68";
+        ctx.fillRect(x,y,8,4);
+      }
+    }
+
+    // sky-ish top sign
+    drawPanel(12,8,336,24,"#f7df8a","#4a2c18");
+    ctx.fillStyle = "#2b1d12";
+    ctx.font = "bold 12px monospace";
+    ctx.fillText(`${currentMonthName()}の畑　タップで作業`, 24,25);
+
+    for(let i=0;i<CELL_COUNT;i++){
+      const cell = state.field[i];
+      const col = i % COLS;
+      const row = Math.floor(i / COLS);
+      const x = START_X + col * (CELL_W + GAP);
+      const y = START_Y + row * (CELL_H + GAP);
+      drawCell(x,y,cell,i);
+    }
+
+    // bottom helper
+    drawPanel(12,382,336,38,"#f4e5b8","#4a2c18");
+    ctx.fillStyle = "#2b1d12";
+    ctx.font = "bold 12px monospace";
+    const toolName = {
+      till:"耕す", plant:"種まき", water:"水やり", harvest:"収穫", clear:"片付け"
+    }[state.selectedTool];
+    const cost = COST[state.selectedTool];
+    ctx.fillText(`選択：${toolName}　消費体力：${cost}`, 24,401);
+    ctx.font = "10px monospace";
+    ctx.fillText("未収穫の作物は月替わりで片付けられます", 24,416);
+  }
+
+  function drawPanel(x,y,w,h,fill,stroke){
+    ctx.fillStyle = stroke;
+    ctx.fillRect(x,y,w,h);
+    ctx.fillStyle = fill;
+    ctx.fillRect(x+3,y+3,w-6,h-6);
+  }
+
+  function drawCell(x,y,cell,index){
+    // shadow
+    ctx.fillStyle = "#0004";
+    ctx.fillRect(x+3,y+4,CELL_W,CELL_H);
+
+    // border
+    ctx.fillStyle = "#3e2817";
+    ctx.fillRect(x,y,CELL_W,CELL_H);
+
+    if(cell.tilled || cell.crop){
+      ctx.fillStyle = "#8f5a31";
+      ctx.fillRect(x+4,y+4,CELL_W-8,CELL_H-8);
+      // soil pixels
+      ctx.fillStyle = "#b77742";
+      for(let yy=y+10; yy<y+CELL_H-6; yy+=12){
+        ctx.fillRect(x+10,yy,16,4);
+        ctx.fillRect(x+38,yy+4,22,4);
+      }
+      ctx.fillStyle = "#6e3f24";
+      ctx.fillRect(x+8,y+CELL_H-12,CELL_W-16,4);
+    } else {
+      ctx.fillStyle = "#77c96a";
+      ctx.fillRect(x+4,y+4,CELL_W-8,CELL_H-8);
+      ctx.fillStyle = "#5eaa54";
+      ctx.fillRect(x+8,y+12,16,4);
+      ctx.fillRect(x+42,y+28,18,4);
+      ctx.fillRect(x+20,y+44,12,4);
+    }
+
+    if(cell.watered){
+      ctx.fillStyle = "#5aa1d8";
+      ctx.globalAlpha = 0.45;
+      ctx.fillRect(x+6,y+6,CELL_W-12,CELL_H-12);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "#a8dcff";
+      ctx.fillRect(x+14,y+11,10,3);
+      ctx.fillRect(x+46,y+18,12,3);
+    }
+
+    if(cell.crop){
+      drawCrop(x,y,cell.crop);
+    }
+
+    // ready mark
+    if(cell.crop){
+      const crop = CROPS[cell.crop.id];
+      if(cell.crop.age >= crop.grow){
+        ctx.fillStyle = "#fff174";
+        ctx.fillRect(x+CELL_W-18,y+6,12,12);
+        ctx.fillStyle = "#4a2c18";
+        ctx.fillRect(x+CELL_W-14,y+9,4,6);
+        ctx.fillRect(x+CELL_W-15,y+14,6,3);
+      }
+    }
+
+    // index small
+    ctx.fillStyle = "#2b1d1288";
+    ctx.font = "10px monospace";
+    ctx.fillText(String(index+1), x+6, y+14);
+  }
+
+  function drawCrop(x,y,cropState){
+    const crop = CROPS[cropState.id];
+    const progress = Math.min(1, cropState.age / crop.grow);
+    const cx = x + CELL_W/2;
+    const base = y + CELL_H - 12;
+
+    // stem
+    ctx.fillStyle = "#2e642f";
+    ctx.fillRect(cx-3, base-22, 6, 22);
+
+    // leaves
+    ctx.fillStyle = crop.top;
+    ctx.fillRect(cx-18, base-23, 14, 8);
+    ctx.fillRect(cx+4, base-27, 16, 8);
+    ctx.fillRect(cx-8, base-33, 16, 8);
+
+    if(progress < 0.34){
+      ctx.fillStyle = "#7ce06f";
+      ctx.fillRect(cx-8, base-18, 16, 8);
+      ctx.fillRect(cx-4, base-26, 8, 8);
+    } else if(progress < 1){
+      ctx.fillStyle = crop.color;
+      ctx.fillRect(cx-9, base-23, 18, 14);
+      ctx.fillStyle = "#0004";
+      ctx.fillRect(cx-9, base-9, 18, 3);
+      ctx.fillStyle = "#ffffff77";
+      ctx.fillRect(cx-5, base-20, 5, 4);
+    } else {
+      // larger ripe vegetable with outline
+      ctx.fillStyle = "#2b1d12";
+      ctx.fillRect(cx-15, base-31, 30, 24);
+      ctx.fillStyle = crop.color;
+      ctx.fillRect(cx-12, base-28, 24, 18);
+      ctx.fillRect(cx-8, base-33, 16, 5);
+      ctx.fillStyle = "#ffffff88";
+      ctx.fillRect(cx-8, base-25, 6, 5);
+      ctx.fillStyle = crop.top;
+      ctx.fillRect(cx-7, base-39, 14, 7);
+      ctx.fillRect(cx-3, base-44, 6, 8);
+    }
+
+    // age dots
+    ctx.fillStyle = "#2b1d12";
+    ctx.fillRect(x+8,y+CELL_H-10,CELL_W-16,3);
+    ctx.fillStyle = "#f3d35b";
+    const fill = Math.floor((CELL_W-16) * progress);
+    ctx.fillRect(x+8,y+CELL_H-10,fill,3);
+  }
+
+  function canvasToCell(evt){
+    const rect = canvas.getBoundingClientRect();
+    const px = (evt.clientX - rect.left) * (canvas.width / rect.width);
+    const py = (evt.clientY - rect.top) * (canvas.height / rect.height);
+
+    for(let i=0;i<CELL_COUNT;i++){
+      const col = i % COLS;
+      const row = Math.floor(i / COLS);
+      const x = START_X + col * (CELL_W + GAP);
+      const y = START_Y + row * (CELL_H + GAP);
+      if(px >= x && px <= x+CELL_W && py >= y && py <= y+CELL_H) return i;
+    }
+    return -1;
+  }
+
+  function doAction(index){
+    if(index < 0) return;
+    const cell = state.field[index];
+    const tool = state.selectedTool;
+
+    if(tool === "till"){
+      if(!hasStamina(COST.till)) return;
+      if(cell.crop || cell.tilled){ log("ここはもう耕してある。"); return; }
+      spendStamina(COST.till);
+      cell.tilled = true;
+      log(`${index+1}番の畑を耕した。`);
+    }
+
+    if(tool === "plant"){
+      const seedId = state.selectedSeed;
+      const crop = CROPS[seedId];
+      if(!crop){ log("タネを選ぼう。"); return; }
+      if(!hasStamina(COST.plant)) return;
+      if(!cell.tilled || cell.crop){ log("タネは耕した空き畑にまける。"); return; }
+      if((state.seeds[seedId] || 0) <= 0){ log(`${crop.name}のタネがない。種屋で買おう。`); return; }
+      spendStamina(COST.plant);
+      state.seeds[seedId]--;
+      cell.crop = {id:seedId, age:0};
+      cell.watered = false;
+      log(`${index+1}番に${crop.name}のタネをまいた。`);
+    }
+
+    if(tool === "water"){
+      if(!hasStamina(COST.water)) return;
+      if(!cell.crop){ log("作物がない場所には水やりできない。"); return; }
+      if(cell.watered){ log("ここは今日もう水やり済み。"); return; }
+      spendStamina(COST.water);
+      cell.watered = true;
+      log(`${index+1}番に水をやった。`);
+    }
+
+    if(tool === "harvest"){
+      if(!hasStamina(COST.harvest)) return;
+      if(!cell.crop){ log("収穫できる作物がない。"); return; }
+      const crop = CROPS[cell.crop.id];
+      if(cell.crop.age < crop.grow){
+        log(`${crop.name}はまだ育っていない。あと${crop.grow - cell.crop.age}日。`);
+        return;
+      }
+      spendStamina(COST.harvest);
+      state.money += crop.sell;
+      state.stats.income += crop.sell;
+      state.stats.shipped[crop.name] = (state.stats.shipped[crop.name] || 0) + 1;
+      cell.crop = null;
+      cell.watered = false;
+      cell.tilled = true;
+      log(`${crop.name}を出荷した。+${moneyText(crop.sell)}`);
+    }
+
+    if(tool === "clear"){
+      if(!hasStamina(COST.clear)) return;
+      if(!cell.crop && !cell.tilled){ log("片付けるものがない。"); return; }
+      spendStamina(COST.clear);
+      cell.crop = null;
+      cell.tilled = false;
+      cell.watered = false;
+      log(`${index+1}番の畑を片付けた。`);
+    }
+
+    render();
+  }
+
+  function endDay(){
+    let grew = 0;
+    state.field.forEach(cell => {
+      if(cell.crop && cell.watered){
+        cell.crop.age++;
+        grew++;
+      }
+      cell.watered = false;
+    });
+    state.stamina = Math.min(state.maxStamina, state.stamina + 50);
+    state.day++;
+
+    if(state.day > 30){
+      finishMonth();
+    } else {
+      log(`翌日になった。水をやった作物が${grew}マス育った。`);
+      render();
+    }
+  }
+
+  function finishMonth(){
+    const oldMonthName = currentMonthName();
+    const oldYear = state.year;
+    const oldMonth = state.month;
+    let withered = 0;
+
+    state.field.forEach(cell => {
+      if(cell.crop){
+        withered++;
+        cell.crop = null;
+      }
+      cell.watered = false;
+    });
+
+    const report = {
+      year: oldYear,
+      monthName: oldMonthName,
+      income: state.stats.income,
+      seedExpense: state.stats.seedExpense,
+      restaurantExpense: state.stats.restaurantExpense,
+      net: state.stats.income - state.stats.seedExpense - state.stats.restaurantExpense,
+      shipped: {...state.stats.shipped},
+      money: state.money,
+      withered
+    };
+
+    state.month++;
+    if(state.month % 4 === 0 && oldMonth !== 0){
+      // handled by cycle; year increments after winter
+    }
+    if(oldMonth % 4 === 3){
+      state.year++;
+    }
+    state.day = 1;
+    state.stats = {income:0, seedExpense:0, restaurantExpense:0, shipped:{}};
+    if(!seasonCropIds().includes(state.selectedSeed)) state.selectedSeed = seasonCropIds()[0];
+
+    showMonthReport(report);
+    log(`${report.monthName}が終わった。${currentMonthName()}が始まる。`);
+    render();
+  }
+
+  function showMonthReport(report){
+    el.monthTitle.textContent = `${report.year}年目 ${report.monthName} 月末収支`;
+
+    const shippedRows = Object.keys(report.shipped).length
+      ? Object.entries(report.shipped).map(([name,count]) => `<tr><th>${escapeHtml(name)}</th><td>${count}個</td></tr>`).join("")
+      : `<tr><th>出荷</th><td>なし</td></tr>`;
+
+    el.monthBody.innerHTML = `
+      <table class="summaryTable">
+        <tr><th>出荷売上</th><td>${moneyText(report.income)}</td></tr>
+        <tr><th>タネ代</th><td>- ${moneyText(report.seedExpense)}</td></tr>
+        <tr><th>食事代</th><td>- ${moneyText(report.restaurantExpense)}</td></tr>
+        <tr><th>月間収支</th><td>${report.net >= 0 ? "+" : ""}${moneyText(report.net)}</td></tr>
+        <tr><th>所持金</th><td>${moneyText(report.money)}</td></tr>
+        <tr><th>月替わりで片付いた作物</th><td>${report.withered}マス</td></tr>
+      </table>
+      <h3>出荷数</h3>
+      <table class="summaryTable">${shippedRows}</table>
+      <p class="note">次の月に育つ野菜は種屋で確認できます。畑の耕した状態は残ります。</p>
+    `;
+    openPanel(el.monthPanel);
+  }
+
+  function openPanel(panel){ panel.classList.add("open"); }
+  function closePanel(panel){ panel.classList.remove("open"); }
+
+  function renderShop(){
+    el.shopCards.innerHTML = "";
+    seasonCropIds().forEach(id => {
+      const c = CROPS[id];
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="cardTop">
+          <div>
+            <div class="cardName">${c.name}のタネ</div>
+            <div class="cardDesc">育成：${c.grow}日 / 出荷額：${moneyText(c.sell)} / 所持：${state.seeds[id] || 0}個</div>
+          </div>
+          <div style="font-weight:900;">${moneyText(c.seed)}</div>
+        </div>
+        <div class="rowButtons">
+          <button data-buy="${id}" data-count="1">1個買う</button>
+          <button data-buy="${id}" data-count="5">5個買う</button>
+        </div>
+      `;
+      el.shopCards.appendChild(card);
+    });
+    el.shopCards.querySelectorAll("[data-buy]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        buySeed(btn.dataset.buy, Number(btn.dataset.count));
+      });
+    });
+  }
+
+  function buySeed(id,count){
+    const c = CROPS[id];
+    const total = c.seed * count;
+    if(state.money < total){
+      log("お金が足りない。");
+      renderShop();
+      return;
+    }
+    state.money -= total;
+    state.stats.seedExpense += total;
+    state.seeds[id] = (state.seeds[id] || 0) + count;
+    log(`${c.name}のタネを${count}個買った。-${moneyText(total)}`);
+    renderShop();
+    render();
+  }
+
+  function renderRestaurant(){
+    const meals = [
+      {name:"おにぎり定食", cost:80, recover:35, desc:"軽く食べて少し回復。"},
+      {name:"野菜カレー", cost:150, recover:70, desc:"午後も畑に戻れる回復量。"},
+      {name:"満腹プレート", cost:240, recover:100, desc:"体力を一気に満タン近くまで戻す。"}
+    ];
+    el.restCards.innerHTML = "";
+    meals.forEach((m, idx) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="cardTop">
+          <div>
+            <div class="cardName">${m.name}</div>
+            <div class="cardDesc">${m.desc}<br>体力 +${m.recover}</div>
+          </div>
+          <div style="font-weight:900;">${moneyText(m.cost)}</div>
+        </div>
+        <button data-meal="${idx}" style="width:100%;">食べる</button>
+      `;
+      el.restCards.appendChild(card);
+    });
+    el.restCards.querySelectorAll("[data-meal]").forEach(btn => {
+      btn.addEventListener("click", () => eatMeal(meals[Number(btn.dataset.meal)]));
+    });
+  }
+
+  function eatMeal(meal){
+    if(state.money < meal.cost){
+      log("お金が足りない。");
+      return;
+    }
+    if(state.stamina >= state.maxStamina){
+      log("体力はもう満タン。");
+      return;
+    }
+    state.money -= meal.cost;
+    state.stats.restaurantExpense += meal.cost;
+    state.stamina = Math.min(state.maxStamina, state.stamina + meal.recover);
+    log(`${meal.name}を食べた。体力が回復した。-${moneyText(meal.cost)}`);
+    renderRestaurant();
+    render();
+  }
+
+  function makeSaveCode(){
+    const copy = JSON.parse(JSON.stringify(state));
+    const raw = JSON.stringify(copy);
+    return btoa(unescape(encodeURIComponent(raw)));
+  }
+
+  function loadSaveCode(code){
+    try{
+      const raw = decodeURIComponent(escape(atob(code.trim())));
+      const data = JSON.parse(raw);
+      validateSave(data);
+      state = normalizeSave(data);
+      log("セーブコードを読み込んだ。");
+      closePanel(el.savePanel);
+      render();
+    }catch(e){
+      alert("セーブコードを読み込めませんでした。文字列を確認してください。");
+    }
+  }
+
+  function validateSave(data){
+    if(!data || data.version !== 1) throw new Error("bad version");
+    if(!Array.isArray(data.field) || data.field.length !== CELL_COUNT) throw new Error("bad field");
+    if(typeof data.money !== "number" || typeof data.day !== "number") throw new Error("bad core");
+  }
+
+  function normalizeSave(data){
+    const base = newGame();
+    const merged = {...base, ...data};
+    merged.stats = {...base.stats, ...(data.stats || {})};
+    merged.stats.shipped = data.stats && data.stats.shipped ? data.stats.shipped : {};
+    merged.seeds = data.seeds || {};
+    merged.log = Array.isArray(data.log) ? data.log.slice(0,8) : base.log;
+    merged.field = data.field.map(cell => ({
+      tilled: !!cell.tilled,
+      watered: !!cell.watered,
+      crop: cell.crop && CROPS[cell.crop.id] ? {id:cell.crop.id, age:Math.max(0, Number(cell.crop.age)||0)} : null
+    }));
+    merged.month = Math.max(0, Number(merged.month) || 0);
+    merged.year = Math.max(1, Number(merged.year) || 1);
+    merged.day = Math.min(30, Math.max(1, Number(merged.day) || 1));
+    merged.maxStamina = 100;
+    merged.stamina = Math.min(100, Math.max(0, Number(merged.stamina) || 0));
+    if(!seasonCropIdsFor(merged.month).includes(merged.selectedSeed)){
+      merged.selectedSeed = seasonCropIdsFor(merged.month)[0];
+    }
+    if(!["till","plant","water","harvest","clear"].includes(merged.selectedTool)){
+      merged.selectedTool = "till";
+    }
+    return merged;
+  }
+
+  function seasonCropIdsFor(month){
+    const s = month % 4;
+    return Object.keys(CROPS).filter(id => CROPS[id].season === s);
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, ch => ({
+      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
+    }[ch]));
+  }
+
+  // events
+  canvas.addEventListener("click", evt => doAction(canvasToCell(evt)));
+
+  document.querySelectorAll("[data-tool]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.selectedTool = btn.dataset.tool;
+      render();
+    });
+  });
+
+  el.seedSelect.addEventListener("change", () => {
+    state.selectedSeed = el.seedSelect.value;
+    render();
+  });
+
+  document.getElementById("nextDayBtn").addEventListener("click", endDay);
+
+  document.getElementById("shopBtn").addEventListener("click", () => {
+    renderShop();
+    openPanel(el.shopPanel);
+  });
+  document.getElementById("closeShop").addEventListener("click", () => closePanel(el.shopPanel));
+
+  document.getElementById("restBtn").addEventListener("click", () => {
+    renderRestaurant();
+    openPanel(el.restPanel);
+  });
+  document.getElementById("closeRest").addEventListener("click", () => closePanel(el.restPanel));
+
+  document.getElementById("saveBtn").addEventListener("click", () => {
+    el.saveText.value = "";
+    openPanel(el.savePanel);
+  });
+  document.getElementById("closeSave").addEventListener("click", () => closePanel(el.savePanel));
+  document.getElementById("makeSave").addEventListener("click", () => {
+    el.saveText.value = makeSaveCode();
+    el.saveText.focus();
+    el.saveText.select();
+  });
+  document.getElementById("loadSave").addEventListener("click", () => loadSaveCode(el.saveText.value));
+
+  document.getElementById("closeMonth").addEventListener("click", () => closePanel(el.monthPanel));
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ヒメハリテンレックとハリネズミのおせわえほん</title>
+  <style>
+    :root {
+      --bg1: #fff7ef;
+      --bg2: #ffe5cf;
+      --card: rgba(255, 251, 246, 0.9);
+      --line: #8f6b52;
+      --accent: #ff9f7b;
+      --accent2: #ffd072;
+      --leaf: #97c585;
+      --sky: linear-gradient(180deg, #bfe9ff 0%, #fff3df 100%);
+      --shadow: 0 14px 30px rgba(126, 81, 49, 0.15);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+      color: #513b2d;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,255,255,0.9), transparent 30%),
+        radial-gradient(circle at 90% 15%, rgba(255,214,179,0.65), transparent 24%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height: 100vh;
+    }
+
+    body.night {
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18), transparent 20%),
+        radial-gradient(circle at 80% 10%, rgba(169,196,255,0.2), transparent 18%),
+        linear-gradient(180deg, #2a3557 0%, #5a4666 48%, #b6775d 100%);
+      color: #f8efe6;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px 18px 30px;
+    }
+
+    .hero {
+      padding: 18px 22px 22px;
+      border-radius: 28px;
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      border: 2px solid rgba(255,255,255,0.7);
+      overflow: hidden;
+      position: relative;
+      isolation: isolate;
+    }
+
+    body.night .hero,
+    body.night .panel,
+    body.night .animal-card,
+    body.night .log,
+    body.night .tips,
+    body.night .action-card,
+    body.night .badge,
+    body.night .fact,
+    body.night .tab-page,
+    body.night .main-tabs,
+    body.night .schedule-item,
+    body.night .name-box,
+    body.night .guide-card {
+      background: rgba(43, 42, 69, 0.72);
+      color: #f8efe6;
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto;
+      z-index: -1;
+      border-radius: 50%;
+      opacity: 0.7;
+    }
+
+    .hero::before {
+      width: 230px;
+      height: 230px;
+      right: -30px;
+      top: -60px;
+      background: radial-gradient(circle, rgba(255,212,157,0.7), rgba(255,212,157,0));
+    }
+
+    .hero::after {
+      width: 280px;
+      height: 280px;
+      left: -80px;
+      bottom: -130px;
+      background: radial-gradient(circle, rgba(158,210,167,0.55), rgba(158,210,167,0));
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 3vw, 2.7rem);
+      line-height: 1.15;
+      letter-spacing: 0.03em;
+    }
+
+    .subtitle {
+      margin: 12px 0 0;
+      font-size: 1rem;
+      line-height: 1.8;
+      max-width: 860px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .status-board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .badge {
+      background: rgba(255,252,246,0.88);
+      border: 2px solid rgba(201,148,108,0.18);
+      border-radius: 20px;
+      padding: 14px 14px 12px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.55);
+    }
+
+    .badge .label {
+      font-size: 0.9rem;
+      opacity: 0.82;
+      margin-bottom: 6px;
+    }
+
+    .badge .value {
+      font-size: 1.2rem;
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .main-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 12px;
+      margin-top: 18px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.55);
+      box-shadow: var(--shadow);
+      border: 2px solid rgba(255,255,255,0.7);
+    }
+
+    .main-tab {
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #fff7ee, #ffe2bf);
+      font-weight: 800;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+    }
+
+    .main-tab.active {
+      background: linear-gradient(180deg, #ffdca9, #ffbf87);
+      transform: translateY(-1px);
+    }
+
+    body.night .main-tab {
+      background: linear-gradient(180deg, #5f598f, #433d69);
+      color: #fff8f1;
+    }
+
+    body.night .main-tab.active {
+      background: linear-gradient(180deg, #887ed1, #6359ab);
+    }
+
+    .tab-page {
+      display: none;
+      margin-top: 18px;
+    }
+
+    .tab-page.active { display: block; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.45fr 0.9fr;
+      gap: 18px;
+    }
+
+    .animals {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .animal-card, .panel, .action-card, .log, .tips, .fact, .guide-card {
+      background: var(--card);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      border: 2px solid rgba(228, 199, 173, 0.55);
+    }
+
+    .animal-card {
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .animal-header {
+      display: flex;
+      gap: 10px;
+      align-items: start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .animal-title {
+      margin: 0;
+      font-size: 1.3rem;
+      line-height: 1.25;
+    }
+
+    .species-note {
+      margin-top: 6px;
+      font-size: 0.92rem;
+      opacity: 0.87;
+      line-height: 1.6;
+    }
+
+    .species-badge {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(194, 150, 116, 0.2);
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-right: 6px;
+    }
+
+    .mood-chip {
+      flex-shrink: 0;
+      align-self: start;
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: linear-gradient(180deg, #fff2d7, #ffd08d);
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
+    }
+
+    body.night .mood-chip {
+      background: linear-gradient(180deg, #6f5ea9, #4c437a);
+      color: #fff6f0;
+    }
+
+    .name-box {
+      margin-bottom: 12px;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(201,148,108,0.16);
+      border-radius: 18px;
+      padding: 10px 12px;
+    }
+
+    .name-box label {
+      display: block;
+      font-size: 0.84rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      opacity: 0.82;
+    }
+
+    .name-box input {
+      width: 100%;
+      border: 1px solid rgba(160, 112, 77, 0.24);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font: inherit;
+      background: rgba(255,255,255,0.86);
+      color: #513b2d;
+    }
+
+    body.night .name-box input {
+      background: rgba(255,255,255,0.12);
+      color: #fff7ef;
+      border-color: rgba(255,255,255,0.14);
+    }
+
+    .activity-note {
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      border-radius: 16px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.48);
+      border: 1px solid rgba(201,148,108,0.14);
+    }
+
+    body.night .activity-note {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .habitat {
+      background: var(--sky);
+      border-radius: 24px;
+      min-height: 330px;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.55);
+    }
+
+    body.night .habitat {
+      background: linear-gradient(180deg, #334c78 0%, #5f577d 52%, #8f755e 100%);
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    .habitat .ground {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 40%;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(255,226,158,0.45), transparent 28%),
+        radial-gradient(circle at 80% 40%, rgba(206,158,113,0.18), transparent 25%),
+        linear-gradient(180deg, #d0b08a 0%, #c79d72 100%);
+      border-top-left-radius: 50% 20%;
+      border-top-right-radius: 45% 18%;
+    }
+
+    .nest {
+      position: absolute;
+      right: 18px;
+      bottom: 62px;
+      width: 104px;
+      height: 78px;
+      background: linear-gradient(180deg, #9b6f4a, #7c5639);
+      border-radius: 52px 52px 28px 28px;
+      box-shadow: inset 0 -8px 0 rgba(58,38,24,0.12);
+      opacity: 0.92;
+    }
+
+    .nest::before {
+      content: "";
+      position: absolute;
+      width: 60px;
+      height: 34px;
+      background: #30241e;
+      border-radius: 40px 40px 26px 26px;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 8px;
+      opacity: 0.95;
+    }
+
+    .grass,
+    .grass::before,
+    .grass::after {
+      position: absolute;
+      content: "";
+      width: 18px;
+      height: 56px;
+      border-radius: 18px 18px 0 0;
+      background: linear-gradient(180deg, #8cc779, #5d9d52);
+      bottom: 55px;
+      transform-origin: bottom center;
+    }
+
+    .grass { left: 26px; transform: rotate(-8deg); }
+    .grass::before { left: 16px; bottom: -4px; height: 48px; transform: rotate(10deg); }
+    .grass::after { left: 33px; bottom: -2px; height: 51px; transform: rotate(17deg); }
+
+    .floating {
+      position: absolute;
+      font-size: 22px;
+      animation: drift 4s ease-in-out infinite;
+      opacity: 0.7;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    @keyframes drift {
+      0%,100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(4deg); }
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.85);
+      box-shadow: 0 0 14px rgba(255,255,255,0.8);
+      animation: twinkle 2s infinite ease-in-out;
+      opacity: 0;
+    }
+
+    body.night .sparkle { opacity: 1; }
+
+    @keyframes twinkle {
+      0%,100% { transform: scale(0.6); opacity: 0.3; }
+      50% { transform: scale(1); opacity: 0.9; }
+    }
+
+    .animal-svg {
+      position: absolute;
+      left: 14px;
+      bottom: 34px;
+      width: 250px;
+      height: auto;
+      transform-origin: center bottom;
+      animation: bob 3.2s ease-in-out infinite;
+      filter: drop-shadow(0 15px 12px rgba(76, 48, 30, 0.16));
+    }
+
+    .animal-svg .blink-line { opacity: 0; }
+    .animal-svg.sleepy .eye-open { opacity: 0; }
+    .animal-svg.sleepy .blink-line { opacity: 1; }
+    .animal-svg.dirty .dust { opacity: 1; }
+    .animal-svg.happy .heart-mark { opacity: 1; }
+    .animal-svg.calm { animation-duration: 4.2s; }
+    .animal-svg.active { animation-duration: 2.1s; }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0) rotate(0); }
+      50% { transform: translateY(-5px) rotate(-1deg); }
+    }
+
+    .dust { opacity: 0; animation: dust 1.8s infinite ease-in-out; }
+    @keyframes dust {
+      0%,100% { transform: translateY(0); opacity: 0.18; }
+      50% { transform: translateY(-7px); opacity: 0.45; }
+    }
+
+    .heart-mark {
+      opacity: 0;
+      animation: pulse 1.6s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%,100% { transform: scale(0.95); }
+      50% { transform: scale(1.15); }
+    }
+
+    .bars {
+      margin-top: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 72px 1fr 46px;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.92rem;
+    }
+
+    .bar-shell {
+      width: 100%;
+      height: 16px;
+      background: rgba(148, 98, 67, 0.12);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #ffaf85 0%, #ffd778 100%);
+      transition: width 0.35s ease;
+      position: relative;
+    }
+
+    .bar-fill::after {
+      content: "";
+      position: absolute;
+      inset: 2px 4px auto 4px;
+      height: 35%;
+      background: rgba(255,255,255,0.35);
+      border-radius: 999px;
+    }
+
+    .bar-fill.low { background: linear-gradient(90deg, #f07862, #ffb070); }
+    .bar-fill.good { background: linear-gradient(90deg, #78c58b, #c7ec7f); }
+
+    .action-grid {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .voice-note {
+      margin-bottom: 12px;
+      min-height: 58px;
+      border-radius: 18px;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.56);
+      border: 1px solid rgba(201,148,108,0.16);
+      line-height: 1.7;
+      font-size: 0.94rem;
+    }
+
+    .voice-note strong {
+      display: inline-block;
+      margin-right: 0.45em;
+      font-size: 0.88rem;
+      opacity: 0.82;
+    }
+
+    body.night .voice-note {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.12);
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      font: inherit;
+      color: inherit;
+    }
+
+    .act {
+      padding: 12px 10px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #fff8ef, #ffe1bf);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 5px 10px rgba(150, 98, 62, 0.1);
+      font-weight: 700;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+      min-height: 66px;
+    }
+
+    .act:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 10px 18px rgba(150, 98, 62, 0.14); }
+    .act:active { transform: translateY(1px); }
+
+    .act.locked {
+      opacity: 0.55;
+      filter: grayscale(0.18);
+    }
+
+    body.night .act {
+      background: linear-gradient(180deg, #5e5788, #433d69);
+      color: #fff9f2;
+    }
+
+    .act small {
+      display: block;
+      margin-top: 3px;
+      font-size: 0.75rem;
+      opacity: 0.8;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    .panel {
+      padding: 16px;
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .action-card, .guide-card { padding: 16px; }
+    .action-card h2, .log h2, .tips h2, .fact h2, .guide-card h2 { margin: 0 0 8px; font-size: 1.1rem; }
+
+    .global-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .global-btn {
+      padding: 14px 12px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #fff1da, #ffd090);
+      font-weight: 800;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.82), 0 6px 12px rgba(145, 88, 44, 0.12);
+    }
+
+    body.night .global-btn {
+      background: linear-gradient(180deg, #6d65a5, #4d467b);
+      color: #fff8f1;
+    }
+
+    .log {
+      padding: 16px;
+      min-height: 220px;
+    }
+
+    .log-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+      max-height: 520px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .log-item {
+      background: rgba(255,255,255,0.55);
+      border-radius: 16px;
+      padding: 10px 12px;
+      line-height: 1.6;
+      font-size: 0.94rem;
+      border: 1px solid rgba(190, 150, 121, 0.15);
+    }
+
+    body.night .log-item {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.08);
+    }
+
+    .guide-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 18px;
+    }
+
+    .guide-stack {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .guide-card p, .guide-card li, .guide-card .save-note {
+      line-height: 1.85;
+      font-size: 0.95rem;
+    }
+
+    .guide-card p { margin: 0; }
+
+    .schedule-list, .mini-list {
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+
+    .schedule-item {
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.42);
+      border: 1px solid rgba(190, 150, 121, 0.12);
+    }
+
+    .schedule-item strong {
+      display: inline-block;
+      min-width: 3em;
+    }
+
+    .save-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .save-status {
+      margin-top: 10px;
+      font-size: 0.92rem;
+      opacity: 0.85;
+      line-height: 1.6;
+    }
+
+    .summary-box {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.45);
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+
+    body.night .summary-box {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      text-align: center;
+      opacity: 0.82;
+      font-size: 0.9rem;
+    }
+
+    .toast-layer {
+      position: fixed;
+      inset: 16px 16px auto auto;
+      display: grid;
+      gap: 10px;
+      z-index: 30;
+      pointer-events: none;
+    }
+
+    .toast {
+      min-width: 240px;
+      max-width: 340px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      color: #513b2d;
+      background: rgba(255,250,242,0.94);
+      border: 2px solid rgba(216, 168, 131, 0.35);
+      box-shadow: 0 12px 24px rgba(78, 53, 33, 0.14);
+      animation: toastIn 0.28s ease, toastOut 0.28s ease 3.2s forwards;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    body.night .toast {
+      background: rgba(40, 40, 64, 0.96);
+      color: #fff7ef;
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes toastOut {
+      to { opacity: 0; transform: translateY(-8px) scale(0.98); }
+    }
+
+    @media (max-width: 980px) {
+      .topbar, .grid, .guide-grid { grid-template-columns: 1fr; }
+      .animals { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 620px) {
+      .status-board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .action-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .global-actions, .save-actions { grid-template-columns: 1fr; }
+      .animal-svg { width: 220px; }
+      .bar-row { grid-template-columns: 64px 1fr 40px; }
+      .main-tabs { display: grid; grid-template-columns: 1fr; }
+    }
+
+    .act.done, .global-btn.locked {
+      opacity: 0.62;
+      filter: grayscale(0.18);
+    }
+
+    .save-code-input {
+      width: 100%;
+      min-height: 118px;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(190, 150, 121, 0.22);
+      background: rgba(255,255,255,0.62);
+      color: inherit;
+      font: inherit;
+      line-height: 1.6;
+      resize: vertical;
+    }
+
+    body.night .save-code-input {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.12);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="topbar">
+        <div>
+          <h1>ヒメハリテンレックとハリネズミのおせわえほん</h1>
+          <p class="subtitle">
+            ふわりと甘い藁の匂いがただよう小さなおへや。木の巣箱のそばには、朝露をとかしたみたいな水皿と、
+            ちいさな足あとを待つやわらかな寝床。ヒメハリテンレックとハリネズミはよく似て見えるけれど、
+            鼻先も耳も、暮らしのリズムも少しずつ違います。夜行性のふたりが安心して眠って、夜には元気に動けるよう、
+            時間に合わせてやさしくお世話してあげてください。
+          </p>
+        </div>
+        <div class="status-board">
+          <div class="badge"><div class="label">おせわ日数</div><div class="value" id="dayCount">1日目</div></div>
+          <div class="badge"><div class="label">いまの時間</div><div class="value" id="clockText">あさ</div></div>
+          <div class="badge"><div class="label">なかよしスター</div><div class="value" id="starCount">0 ★</div></div>
+          <div class="badge"><div class="label">おへや</div><div class="value" id="roomMood">のどか</div></div>
+        </div>
+      </div>
+    </section>
+
+    <nav class="main-tabs" aria-label="ゲームタブ">
+      <button class="main-tab" data-tab="guide">ゲーム説明</button>
+      <button class="main-tab active" data-tab="care">お世話</button>
+      <button class="main-tab" data-tab="diary">日記ログ</button>
+    </nav>
+
+    <section class="tab-page" data-tab-page="guide">
+      <div class="guide-grid">
+        <div class="guide-stack">
+          <section class="guide-card">
+            <h2>遊び方</h2>
+            <p>
+              おせわタブでは、ヒメハリテンレックとハリネズミに名前をつけて、時間帯に合ったお世話をします。
+              見る項目は「お腹」「楽しさ」「きれい」の3つだけです。1つの時間帯では、個別ならふたりに1回ずつ、
+              まとめてお世話なら1回で時間が進みます。夜行性なので、昼は静かなお世話、夜はごはんや遊びが中心です。
+            </p>
+          </section>
+
+          <section class="guide-card">
+            <h2>夜行性のおせわ時間</h2>
+            <ul class="schedule-list">
+              <li class="schedule-item"><strong>あさ</strong> 夜の活動をしめくくって巣箱にもどる時間。軽いごはん、おみず交換、寝床を整えるおそうじ、やさしい声かけが向いています。</li>
+              <li class="schedule-item"><strong>ひる</strong> ぐっすり眠る時間。おみず、静かなおそうじ、保温や寝床の見直し、そっと名前を呼ぶ程度のお世話が中心です。</li>
+              <li class="schedule-item"><strong>よる</strong> いちばん元気。しっかりごはん、あそび、運動、種ごとの特別なお世話、明るい声かけがぴったりです。</li>
+            </ul>
+          </section>
+        </div>
+
+        <div class="guide-stack">
+          <section class="guide-card">
+            <h2>ふたりのちがい</h2>
+            <ul class="mini-list">
+              <li class="schedule-item">ヒメハリテンレックは、鼻先がすっと細く、耳が少し大きめ。あたたかさを保つお世話が得意です。</li>
+              <li class="schedule-item">ハリネズミは、顔まわりがやや丸く、耳が小ぶり。夜の運動や気分転換でごきげんになりやすいです。</li>
+              <li class="schedule-item">見た目は似ていても別の仲間。ゲームでも、それぞれのらしさが出るように描き分けています。</li>
+            </ul>
+          </section>
+
+          <section class="guide-card">
+            <h2>セーブについて</h2>
+            <p class="save-note">
+              通常セーブは localStorage と IndexedDB に自動保存されます。さらに保険として、
+              おせわタブで「セーブコード書き出し / 読み込み」も使えます。お世話、名前、日記ログ、スター、時間帯が保存されます。
+            </p>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-page active" data-tab-page="care">
+      <div class="grid">
+        <section class="animals">
+          <article class="animal-card" data-animal="tenrec">
+            <div class="animal-header">
+              <div>
+                <h2 class="animal-title" id="tenrecPetName">ヒメハリテンレック</h2>
+                <div class="species-note"><span class="species-badge">ヒメハリテンレック</span>鼻先はすっと細め、耳はやや大きめ。背中の針はやわらかな色合いで、実物らしい輪郭を残しつつ絵本みたいに愛らしく描かれています。</div>
+              </div>
+              <div class="mood-chip" id="tenrecMoodChip">ごきげん</div>
+            </div>
+
+            <div class="name-box">
+              <label for="tenrecNameInput">おなまえ</label>
+              <input id="tenrecNameInput" type="text" maxlength="12" placeholder="ヒメハリテンレックの名前をいれてね" />
+            </div>
+
+            <div class="activity-note" id="tenrecActivityNote">いまのお世話を確認中です。</div>
+            <div class="voice-note" id="tenrecVoiceNote"><strong>こえ</strong><span>まだ呼びかけていません。</span></div>
+
+            <div class="habitat" id="tenrecHabitat">
+              <div class="sparkle" style="left: 36px; top: 30px; animation-delay: 0s;"></div>
+              <div class="sparkle" style="left: 180px; top: 55px; animation-delay: 0.8s;"></div>
+              <div class="sparkle" style="right: 30px; top: 22px; animation-delay: 1.4s;"></div>
+              <div class="floating" style="right: 120px; top: 16px;">🌿</div>
+              <div class="ground"></div>
+              <div class="grass"></div>
+              <div class="nest"></div>
+              <svg class="animal-svg happy calm" id="tenrecSvg" viewBox="0 0 320 220" aria-label="ヒメハリテンレックのイラスト" role="img">
+              <defs>
+                <linearGradient id="tenrecBody" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#f1d9bc" />
+                  <stop offset="100%" stop-color="#d9b390" />
+                </linearGradient>
+                <linearGradient id="tenrecSpineDark" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#8c6046" />
+                  <stop offset="100%" stop-color="#68402e" />
+                </linearGradient>
+                <linearGradient id="tenrecSpineLight" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#f8ebc5" />
+                  <stop offset="100%" stop-color="#ead19c" />
+                </linearGradient>
+              </defs>
+
+              <g class="dust">
+                <circle cx="256" cy="94" r="5" fill="rgba(150,120,100,0.32)" />
+                <circle cx="274" cy="82" r="4" fill="rgba(150,120,100,0.24)" />
+                <circle cx="245" cy="74" r="3.5" fill="rgba(150,120,100,0.2)" />
+              </g>
+
+              <g class="heart-mark" transform="translate(42 22)">
+                <path d="M12 24 C-4 12, 2 -8, 18 6 C34 -8, 40 12, 24 24 L18 30 Z" fill="#ff8da1" opacity="0.9"/>
+              </g>
+
+              <g transform="translate(22 15)">
+                <path d="M120 145 C98 112, 90 88, 108 58 C142 12, 236 16, 278 62 C298 84, 298 116, 280 134 C256 158, 156 172, 120 145 Z" fill="#c89b73" opacity="0.14"/>
+                <g>
+                  <path d="M120 125 L102 48 L138 108 Z" fill="url(#tenrecSpineDark)" />
+                  <path d="M138 117 L124 40 L156 98 Z" fill="url(#tenrecSpineLight)" />
+                  <path d="M156 112 L146 34 L174 95 Z" fill="url(#tenrecSpineDark)" />
+                  <path d="M174 108 L168 32 L194 92 Z" fill="url(#tenrecSpineLight)" />
+                  <path d="M192 104 L192 34 L214 92 Z" fill="url(#tenrecSpineDark)" />
+                  <path d="M210 104 L220 36 L234 92 Z" fill="url(#tenrecSpineLight)" />
+                  <path d="M228 108 L248 46 L250 100 Z" fill="url(#tenrecSpineDark)" />
+                  <path d="M244 116 L272 62 L262 108 Z" fill="url(#tenrecSpineLight)" />
+                </g>
+                <ellipse cx="165" cy="122" rx="104" ry="56" fill="url(#tenrecBody)" />
+                <ellipse cx="88" cy="130" rx="44" ry="30" fill="#edd8c1" />
+                <path d="M44 132 C53 118, 66 114, 86 116 C70 136, 61 142, 48 144 C43 141, 41 136, 44 132 Z" fill="#efd8c2" />
+                <ellipse cx="40" cy="134" rx="8" ry="6" fill="#745040" />
+                <path d="M43 137 Q53 142 59 141" stroke="#7a5a45" stroke-width="2.6" fill="none" stroke-linecap="round" />
+                <ellipse cx="88" cy="93" rx="17" ry="20" fill="#d8b294" transform="rotate(-18 88 93)" />
+                <ellipse cx="102" cy="90" rx="16" ry="18" fill="#d0a884" transform="rotate(16 102 90)" />
+                <ellipse cx="96" cy="91" rx="8.5" ry="10" fill="#f2dfcd" />
+                <circle class="eye-open" cx="77" cy="124" r="4.7" fill="#322820" />
+                <circle class="eye-open" cx="98" cy="124" r="4.4" fill="#322820" />
+                <path class="blink-line" d="M70 124 Q77 120 84 124" stroke="#322820" stroke-width="3" fill="none" stroke-linecap="round" />
+                <path class="blink-line" d="M92 124 Q99 120 106 124" stroke="#322820" stroke-width="3" fill="none" stroke-linecap="round" />
+                <circle cx="75" cy="122" r="1.1" fill="#fff" />
+                <circle cx="96" cy="122" r="1.1" fill="#fff" />
+                <path d="M125 164 C123 154, 129 146, 138 146 C147 146, 152 155, 149 166" fill="#8c6651" />
+                <path d="M172 170 C168 158, 174 148, 185 148 C196 148, 201 160, 198 173" fill="#8c6651" />
+                <path d="M235 160 C233 150, 240 144, 248 144 C255 144, 260 151, 259 162" fill="#8c6651" />
+                <ellipse cx="72" cy="137" rx="8" ry="5" fill="#f3b3b7" opacity="0.45" />
+                <ellipse cx="103" cy="137" rx="7" ry="4.5" fill="#f3b3b7" opacity="0.35" />
+              </g>
+            </svg>
+            </div>
+
+            <div class="bars" id="tenrecBars"></div>
+
+            <div class="action-grid">
+              <button class="act" data-action="feed" data-target="tenrec">🍽 ごはん<small>虫いりミックス</small></button>
+              <button class="act" data-action="water" data-target="tenrec">💧 おみず<small>お皿をみたす</small></button>
+              <button class="act" data-action="clean" data-target="tenrec">🧹 おそうじ<small>寝床をふかふかに</small></button>
+              <button class="act" data-action="play" data-target="tenrec">🧶 あそぶ<small>ひらひら布で遊ぶ</small></button>
+              <button class="act" data-action="rest" data-target="tenrec">🌙 ひとやすみ<small>巣箱でお昼寝</small></button>
+              <button class="act" data-action="special" data-target="tenrec">🔥 ぽかぽか<small>あたたかくする</small></button>
+              <button class="act" data-action="call" data-target="tenrec">📣 よびかけ<small>名前をやさしく呼ぶ</small></button>
+            </div>
+          </article>
+
+          <article class="animal-card" data-animal="hedgehog">
+            <div class="animal-header">
+              <div>
+                <h2 class="animal-title" id="hedgehogPetName">ハリネズミ</h2>
+                <div class="species-note"><span class="species-badge">ハリネズミ</span>顔はやや丸く、耳は小ぶり。背中の針は密で丸いシルエットになり、実物らしい特徴を残しながら優しい絵本タッチにしています。</div>
+              </div>
+              <div class="mood-chip" id="hedgehogMoodChip">おだやか</div>
+            </div>
+
+            <div class="name-box">
+              <label for="hedgehogNameInput">おなまえ</label>
+              <input id="hedgehogNameInput" type="text" maxlength="12" placeholder="ハリネズミの名前をいれてね" />
+            </div>
+
+            <div class="activity-note" id="hedgehogActivityNote">いまのお世話を確認中です。</div>
+            <div class="voice-note" id="hedgehogVoiceNote"><strong>こえ</strong><span>まだ呼びかけていません。</span></div>
+
+            <div class="habitat" id="hedgehogHabitat">
+              <div class="sparkle" style="left: 50px; top: 34px; animation-delay: 0.2s;"></div>
+              <div class="sparkle" style="left: 200px; top: 60px; animation-delay: 1.2s;"></div>
+              <div class="sparkle" style="right: 38px; top: 26px; animation-delay: 1.8s;"></div>
+              <div class="floating" style="right: 116px; top: 18px;">⭐</div>
+              <div class="ground"></div>
+              <div class="grass"></div>
+              <div class="nest" style="right: auto; left: 18px;"></div>
+              <svg class="animal-svg happy active" id="hedgehogSvg" viewBox="0 0 320 220" aria-label="ハリネズミのイラスト" role="img" style="left:auto; right: 10px;">
+              <defs>
+                <linearGradient id="hedgeFace" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#eddcc8" />
+                  <stop offset="100%" stop-color="#dec5a7" />
+                </linearGradient>
+                <linearGradient id="hedgeBody" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#7f726d" />
+                  <stop offset="100%" stop-color="#5c5151" />
+                </linearGradient>
+                <linearGradient id="hedgeSpine1" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#8b817d" />
+                  <stop offset="100%" stop-color="#584f4f" />
+                </linearGradient>
+                <linearGradient id="hedgeSpine2" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#ebe1d2" />
+                  <stop offset="100%" stop-color="#c9baa5" />
+                </linearGradient>
+              </defs>
+
+              <g class="dust">
+                <circle cx="70" cy="76" r="4" fill="rgba(145,125,115,0.24)" />
+                <circle cx="55" cy="92" r="5" fill="rgba(145,125,115,0.28)" />
+                <circle cx="88" cy="96" r="3.5" fill="rgba(145,125,115,0.18)" />
+              </g>
+
+              <g class="heart-mark" transform="translate(238 18)">
+                <path d="M12 24 C-4 12, 2 -8, 18 6 C34 -8, 40 12, 24 24 L18 30 Z" fill="#ff8da1" opacity="0.9"/>
+              </g>
+
+              <g transform="translate(26 15)">
+                <path d="M36 126 C62 66, 118 26, 190 34 C253 40, 286 94, 282 130 C276 170, 220 180, 136 182 C80 183, 44 172, 36 126 Z" fill="#5b504f" opacity="0.12" />
+                <g>
+                  <path d="M70 130 L58 68 L94 118 Z" fill="url(#hedgeSpine1)" />
+                  <path d="M88 118 L76 52 L110 108 Z" fill="url(#hedgeSpine2)" />
+                  <path d="M106 108 L100 42 L130 102 Z" fill="url(#hedgeSpine1)" />
+                  <path d="M126 100 L128 34 L150 98 Z" fill="url(#hedgeSpine2)" />
+                  <path d="M148 98 L162 30 L170 96 Z" fill="url(#hedgeSpine1)" />
+                  <path d="M170 98 L194 34 L190 102 Z" fill="url(#hedgeSpine2)" />
+                  <path d="M192 102 L224 46 L208 112 Z" fill="url(#hedgeSpine1)" />
+                  <path d="M212 112 L248 62 L226 120 Z" fill="url(#hedgeSpine2)" />
+                  <path d="M228 124 L266 86 L236 132 Z" fill="url(#hedgeSpine1)" />
+                </g>
+                <ellipse cx="152" cy="126" rx="112" ry="58" fill="url(#hedgeBody)" />
+                <ellipse cx="228" cy="134" rx="42" ry="30" fill="url(#hedgeFace)" />
+                <ellipse cx="246" cy="96" rx="11" ry="13" fill="#c7ae95" />
+                <ellipse cx="224" cy="97" rx="12" ry="14" fill="#d2b79c" />
+                <ellipse cx="228" cy="97" rx="6" ry="8" fill="#f1dfcd" opacity="0.95" />
+                <path d="M264 136 C274 130, 286 132, 292 142 C286 150, 272 152, 260 147 Z" fill="#e8d2be" />
+                <ellipse cx="294" cy="144" rx="7" ry="6" fill="#51403a" />
+                <path d="M282 149 Q273 155 261 152" stroke="#6d554b" stroke-width="2.4" fill="none" stroke-linecap="round" />
+                <circle class="eye-open" cx="236" cy="129" r="4.8" fill="#2e2421" />
+                <path class="blink-line" d="M230 129 Q236 124 242 129" stroke="#2e2421" stroke-width="3" fill="none" stroke-linecap="round" />
+                <circle cx="234" cy="127.5" r="1.1" fill="#fff" />
+                <ellipse cx="218" cy="142" rx="7.5" ry="4.8" fill="#f3b3b7" opacity="0.35" />
+                <path d="M108 178 C106 166, 114 156, 124 156 C133 156, 139 166, 137 179" fill="#6d5b58" />
+                <path d="M160 181 C157 167, 166 158, 176 158 C188 158, 193 170, 191 184" fill="#6d5b58" />
+                <path d="M214 174 C212 162, 219 154, 229 154 C237 154, 242 165, 240 177" fill="#6d5b58" />
+              </g>
+            </svg>
+            </div>
+
+            <div class="bars" id="hedgehogBars"></div>
+
+            <div class="action-grid">
+              <button class="act" data-action="feed" data-target="hedgehog">🍽 ごはん<small>カリカリごはん</small></button>
+              <button class="act" data-action="water" data-target="hedgehog">💧 おみず<small>お皿をあらう</small></button>
+              <button class="act" data-action="clean" data-target="hedgehog">🧹 おそうじ<small>床材を入れ替え</small></button>
+              <button class="act" data-action="play" data-target="hedgehog">🧸 あそぶ<small>トンネル遊び</small></button>
+              <button class="act" data-action="rest" data-target="hedgehog">🌙 ひとやすみ<small>巣箱でまるくなる</small></button>
+              <button class="act" data-action="special" data-target="hedgehog">🛞 くるくる運動<small>夜の気分転換</small></button>
+              <button class="act" data-action="call" data-target="hedgehog">📣 よびかけ<small>名前をやさしく呼ぶ</small></button>
+            </div>
+          </article>
+        </section>
+
+        <aside class="panel">
+          <section class="action-card">
+            <h2>いまのお世話ヒント</h2>
+            <p id="phaseDescription">夜行性のふたりに合うお世話をまとめています。</p>
+            <div class="summary-box" id="phaseSummary"></div>
+          </section>
+
+          <section class="action-card">
+            <h2>まとめてお世話</h2>
+            <div class="global-actions">
+              <button class="global-btn" id="bothFeed">🍲 ふたりにごはん</button>
+              <button class="global-btn" id="bothRest">😴 ふたりを休ませる</button>
+              <button class="global-btn" id="refreshRoom">🪶 おへやを整える</button>
+            </div>
+          </section>
+
+          <section class="action-card">
+            <h2>セーブ</h2>
+            <div class="save-actions">
+              <button class="global-btn" id="saveBtn">💾 いますぐ保存</button>
+              <button class="global-btn" id="loadBtn">📖 自動保存を読む</button>
+              <button class="global-btn" id="exportCodeBtn">🧾 コード書き出し</button>
+              <button class="global-btn" id="importCodeBtn">📥 コード読み込み</button>
+              <button class="global-btn" id="copyCodeBtn">📋 コードをコピー</button>
+              <button class="global-btn" id="resetBtn">↺ リセット</button>
+            </div>
+            <textarea class="save-code-input" id="saveCodeInput" placeholder="ここにセーブコードが表示されます。別の端末では、この欄に貼り付けて『コード読み込み』を押してください。"></textarea>
+            <div class="save-status" id="saveStatus">自動保存の準備中です。</div>
+          </section>
+        </aside>
+      </div>
+    </section>
+
+    <section class="tab-page" data-tab-page="diary">
+      <section class="log">
+        <h2>日記ログ</h2>
+        <div class="summary-box" id="diarySummary">まだ記録がありません。</div>
+        <div class="log-list" id="logList"></div>
+      </section>
+    </section>
+
+    <p class="footer-note">やさしくお世話すると、ふたりの表情や動きも少しずつ変わります。</p>
+  </div>
+
+  <div class="toast-layer" id="toastLayer"></div>
+
+  <script>
+    const STORAGE_KEY = 'tenrecHedgehogCareSaveV4';
+    const LEGACY_STORAGE_KEYS = ['tenrecHedgehogCareSaveV3', 'tenrecHedgehogCareSaveV2'];
+    const DB_NAME = 'tenrecHedgehogCareDB';
+    const DB_STORE = 'saves';
+    const DB_SLOT = 'autosave';
+    const SAVE_CODE_PREFIX = 'THC4-';
+    const timeNames = ['あさ', 'ひる', 'よる'];
+    const statKeys = ['hunger', 'fun', 'clean'];
+    const actionNames = {
+      feed: 'ごはん',
+      water: 'おみず',
+      clean: 'おそうじ',
+      play: 'あそぶ',
+      rest: 'ひとやすみ',
+      special: '特別なお世話',
+      call: 'なまえよび'
+    };
+
+    const animalDefs = {
+      tenrec: {
+        species: 'ヒメハリテンレック',
+        barsId: 'tenrecBars',
+        moodChipId: 'tenrecMoodChip',
+        svgId: 'tenrecSvg',
+        habitatId: 'tenrecHabitat',
+        titleId: 'tenrecPetName',
+        inputId: 'tenrecNameInput',
+        noteId: 'tenrecActivityNote',
+        nickname: '',
+        stats: { hunger: 80, fun: 78, clean: 84 },
+        labels: { hunger: 'お腹', fun: '楽しさ', clean: 'きれい' }
+      },
+      hedgehog: {
+        species: 'ハリネズミ',
+        barsId: 'hedgehogBars',
+        moodChipId: 'hedgehogMoodChip',
+        svgId: 'hedgehogSvg',
+        habitatId: 'hedgehogHabitat',
+        titleId: 'hedgehogPetName',
+        inputId: 'hedgehogNameInput',
+        noteId: 'hedgehogActivityNote',
+        nickname: '',
+        stats: { hunger: 77, fun: 76, clean: 80 },
+        labels: { hunger: 'お腹', fun: '楽しさ', clean: 'きれい' }
+      }
+    };
+
+    const defaultState = {
+      stars: 0,
+      timeIndex: 0,
+      day: 1,
+      roomMood: 'のどか',
+      logs: [],
+      activeTab: 'care',
+      lastSavedText: '',
+      voiceNotes: {
+        tenrec: 'まだ呼びかけていません。',
+        hedgehog: 'まだ呼びかけていません。'
+      },
+      careProgress: {
+        tenrec: false,
+        hedgehog: false
+      }
+    };
+
+    const state = deepClone(defaultState);
+    const defaultAnimalStats = deepClone(Object.fromEntries(
+      Object.entries(animalDefs).map(([key, def]) => [key, def.stats])
+    ));
+
+    const phaseDescriptions = {
+      あさ: '夜の活動がおわって、巣箱にもどる時間です。朝は軽いごはん、飲み水の交換、寝床の手入れが向いています。',
+      ひる: 'いちばん眠い時間です。静かなお水替え、そっとしたおそうじ、休憩ややさしい声かけが中心です。',
+      よる: 'ふたりが元気いっぱいになる本番の時間です。しっかりごはん、あそび、種ごとの特別なお世話がぴったりです。'
+    };
+
+    const phaseLogs = {
+      あさ: '朝の気配がふわりと差しこんで、ふたりは巣箱にもどる支度をはじめた。',
+      ひる: '昼のやわらかな明るさのなか、ふたりは静かにまどろんでいる。',
+      よる: 'おへやが夜色に染まると、ふたりの目がきらりと輝いて動き出した。'
+    };
+
+    const phaseActionLabels = {
+      あさ: {
+        tenrec: {
+          feed: '夜あけのひとくち',
+          water: '朝のおみず替え',
+          clean: '寝床の整え',
+          play: 'いまは休む時間',
+          rest: '巣箱にもどる',
+          special: '保温布チェック',
+          call: 'おやすみ前によぶ'
+        },
+        hedgehog: {
+          feed: 'おやすみ前ごはん',
+          water: '朝のおみず替え',
+          clean: '床材をならす',
+          play: 'いまは休む時間',
+          rest: 'くるんと休憩',
+          special: '巣箱にもどる見守り',
+          call: 'おやすみ前によぶ'
+        }
+      },
+      ひる: {
+        tenrec: {
+          feed: 'ひるは寝んね中',
+          water: '静かな水分確認',
+          clean: 'そっと寝床交換',
+          play: '起こさない時間',
+          rest: 'ぐっすり休憩',
+          special: '保温布を整える',
+          call: 'こしょこしょ声'
+        },
+        hedgehog: {
+          feed: 'ひるは寝んね中',
+          water: '静かな水分確認',
+          clean: 'そっと床材交換',
+          play: '起こさない時間',
+          rest: 'ぐっすり休憩',
+          special: '夜にむけて落ち着く',
+          call: 'こしょこしょ声'
+        }
+      },
+      よる: {
+        tenrec: {
+          feed: '夜の虫ミックス',
+          water: '活動前のおみず',
+          clean: '動ける床づくり',
+          play: 'ひらひら遊び',
+          rest: '少しだけ休む',
+          special: 'ぽかぽかケア',
+          call: '元気におなまえ'
+        },
+        hedgehog: {
+          feed: '夜のメインごはん',
+          water: '活動前のおみず',
+          clean: '走れる床づくり',
+          play: 'トンネル遊び',
+          rest: '少しだけ休む',
+          special: 'くるくる運動',
+          call: '元気におなまえ'
+        }
+      }
+    };
+
+    let dbPromise = null;
+
+    function deepClone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function clamp(v) {
+      return Math.max(0, Math.min(100, Math.round(Number(v) || 0)));
+    }
+
+    function formatStamp(ts = Date.now()) {
+      const d = new Date(ts);
+      return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+    }
+
+    function displayName(animalKey) {
+      const def = animalDefs[animalKey];
+      return def.nickname && def.nickname.trim() ? def.nickname.trim() : def.species;
+    }
+
+    function namedSpecies(animalKey) {
+      const def = animalDefs[animalKey];
+      return def.nickname && def.nickname.trim() ? `${def.nickname.trim()}（${def.species}）` : def.species;
+    }
+
+    function applyDelta(stats, delta) {
+      Object.entries(delta).forEach(([key, value]) => {
+        if (key in stats) stats[key] = clamp(stats[key] + value);
+      });
+    }
+
+    function averageStats(stats) {
+      const vals = Object.values(stats);
+      return vals.reduce((a, b) => a + b, 0) / vals.length;
+    }
+
+    function setSaveStatus(text) {
+      state.lastSavedText = text;
+      const el = document.getElementById('saveStatus');
+      if (el) el.textContent = text;
+    }
+
+    function openSaveDb() {
+      if (!('indexedDB' in window)) return Promise.resolve(null);
+      if (!dbPromise) {
+        dbPromise = new Promise((resolve, reject) => {
+          const req = indexedDB.open(DB_NAME, 1);
+          req.onupgradeneeded = () => {
+            const db = req.result;
+            if (!db.objectStoreNames.contains(DB_STORE)) db.createObjectStore(DB_STORE);
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        }).catch(err => {
+          console.warn('indexedDB open failed', err);
+          return null;
+        });
+      }
+      return dbPromise;
+    }
+
+    async function saveToIndexedDb(payload) {
+      const db = await openSaveDb();
+      if (!db) return false;
+      return new Promise(resolve => {
+        const tx = db.transaction(DB_STORE, 'readwrite');
+        tx.objectStore(DB_STORE).put(payload, DB_SLOT);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => {
+          console.warn('indexedDB save failed', tx.error);
+          resolve(false);
+        };
+      });
+    }
+
+    async function loadFromIndexedDb() {
+      const db = await openSaveDb();
+      if (!db) return null;
+      return new Promise(resolve => {
+        const tx = db.transaction(DB_STORE, 'readonly');
+        const req = tx.objectStore(DB_STORE).get(DB_SLOT);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => {
+          console.warn('indexedDB load failed', req.error);
+          resolve(null);
+        };
+      });
+    }
+
+    function buildSavePayload() {
+      return {
+        version: 4,
+        savedAt: Date.now(),
+        state: deepClone(state),
+        animalData: Object.fromEntries(
+          Object.entries(animalDefs).map(([key, def]) => [key, {
+            nickname: def.nickname,
+            stats: deepClone(def.stats)
+          }])
+        )
+      };
+    }
+
+    async function saveState(notify = false, mode = '自動保存') {
+      const payload = buildSavePayload();
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (err) {
+        console.warn('localStorage save failed', err);
+      }
+      saveToIndexedDb(payload);
+      setSaveStatus(`${mode}しました。${formatStamp(payload.savedAt)} に更新。通常セーブは localStorage と IndexedDB に保存され、保険としてセーブコードも使えます。`);
+      if (notify) toast(mode === '手動保存' ? '保存しました' : `${mode}しました`);
+      return payload;
+    }
+
+    function tryParse(text) {
+      if (!text) return null;
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        console.warn('parse failed', err);
+        return null;
+      }
+    }
+
+    function migrateStats(payloadStats, animalKey) {
+      const defaults = deepClone(defaultAnimalStats[animalKey]);
+      if (!payloadStats || typeof payloadStats !== 'object') return defaults;
+      if ('hunger' in payloadStats && 'fun' in payloadStats && 'clean' in payloadStats) {
+        return {
+          hunger: clamp(payloadStats.hunger),
+          fun: clamp(payloadStats.fun),
+          clean: clamp(payloadStats.clean)
+        };
+      }
+      const funSources = ['fun', 'happy', 'energy', 'comfort']
+        .map(key => Number(payloadStats[key]))
+        .filter(v => Number.isFinite(v));
+      const derivedFun = funSources.length
+        ? Math.round(funSources.reduce((a, b) => a + b, 0) / funSources.length)
+        : defaults.fun;
+      return {
+        hunger: clamp(payloadStats.hunger ?? defaults.hunger),
+        fun: clamp(derivedFun),
+        clean: clamp(payloadStats.clean ?? defaults.clean)
+      };
+    }
+
+    function applyLoadedData(data) {
+      Object.assign(state, deepClone(defaultState));
+      if (data?.state) {
+        state.stars = Math.max(0, Number(data.state.stars) || 0);
+        state.timeIndex = Math.abs(Number(data.state.timeIndex ?? 0)) % timeNames.length;
+        state.day = Math.max(1, Number(data.state.day ?? 1) || 1);
+        state.roomMood = (data.state.roomMood || state.roomMood).toString();
+        state.logs = Array.isArray(data.state.logs) ? data.state.logs.slice(0, 60).map(v => String(v)) : [];
+        state.activeTab = ['guide', 'care', 'diary'].includes(data.state.activeTab) ? data.state.activeTab : 'care';
+        state.lastSavedText = String(data.state.lastSavedText || '');
+        state.voiceNotes = {
+          tenrec: String(data.state.voiceNotes?.tenrec || 'まだ呼びかけていません。'),
+          hedgehog: String(data.state.voiceNotes?.hedgehog || 'まだ呼びかけていません。')
+        };
+        state.careProgress = {
+          tenrec: !!data.state.careProgress?.tenrec,
+          hedgehog: !!data.state.careProgress?.hedgehog
+        };
+      }
+
+      Object.entries(animalDefs).forEach(([key, def]) => {
+        def.nickname = '';
+        def.stats = deepClone(defaultAnimalStats[key]);
+      });
+
+      if (data?.animalData) {
+        Object.entries(data.animalData).forEach(([key, payload]) => {
+          if (!animalDefs[key]) return;
+          animalDefs[key].nickname = String(payload.nickname || '').slice(0, 12);
+          animalDefs[key].stats = migrateStats(payload.stats, key);
+        });
+      } else if (data?.animalStats) {
+        Object.entries(data.animalStats).forEach(([key, stats]) => {
+          if (!animalDefs[key]) return;
+          animalDefs[key].stats = migrateStats(stats, key);
+        });
+      }
+
+      if (!state.logs.length) {
+        state.logs = ['1日目・あさ｜ヒメハリテンレックとハリネズミが、ふかふかの寝床からそっと顔をのぞかせた。'];
+      }
+    }
+
+    function readLocalPayload() {
+      const current = tryParse(localStorage.getItem(STORAGE_KEY));
+      if (current) return { payload: current, label: '自動保存を読み込みました。' };
+      for (const key of LEGACY_STORAGE_KEYS) {
+        const legacy = tryParse(localStorage.getItem(key));
+        if (legacy) return { payload: legacy, label: '以前の保存データを読み込みました。' };
+      }
+      return null;
+    }
+
+    async function loadState(notify = false) {
+      const local = readLocalPayload();
+      if (local?.payload) {
+        applyLoadedData(local.payload);
+        renderAll();
+        setSaveStatus(`${local.label} 通常セーブは localStorage と IndexedDB に自動保存されます。`);
+        saveState(false, '自動保存');
+        if (notify) toast('ロードしました');
+        return true;
+      }
+
+      const idbPayload = await loadFromIndexedDb();
+      if (idbPayload) {
+        applyLoadedData(idbPayload);
+        renderAll();
+        setSaveStatus('IndexedDB の自動保存を読み込みました。');
+        saveState(false, '自動保存');
+        if (notify) toast('ロードしました');
+        return true;
+      }
+      return false;
+    }
+
+    async function importSaveCode() {
+      const box = document.getElementById('saveCodeInput');
+      const text = (box.value || '').trim();
+      if (!text) {
+        toast('セーブコードを入れてください');
+        return;
+      }
+      try {
+        let raw = text.replace(/\s+/g, '');
+        if (raw.startsWith(SAVE_CODE_PREFIX)) raw = raw.slice(SAVE_CODE_PREFIX.length);
+        const binary = atob(raw);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+        const json = new TextDecoder().decode(bytes);
+        const payload = JSON.parse(json);
+        applyLoadedData(payload);
+        renderAll();
+        setSaveStatus('セーブコードを読み込みました。いまの状態で自動保存も更新します。');
+        await saveState(false, 'コード読み込み後に保存');
+        toast('セーブコードを読み込みました');
+      } catch (err) {
+        console.warn('save code import failed', err);
+        setSaveStatus('セーブコードの読み込みに失敗しました。');
+        toast('セーブコードを読み込めませんでした');
+      }
+    }
+
+    async function exportSaveCode() {
+      const payload = await saveState(false, '手動保存');
+      const json = JSON.stringify(payload);
+      const bytes = new TextEncoder().encode(json);
+      let binary = '';
+      bytes.forEach(b => { binary += String.fromCharCode(b); });
+      const code = SAVE_CODE_PREFIX + btoa(binary);
+      const box = document.getElementById('saveCodeInput');
+      box.value = code;
+      box.focus();
+      box.select();
+      setSaveStatus(`セーブコードを書き出しました。${formatStamp()} の状態です。`);
+      toast('セーブコードを書き出しました');
+    }
+
+    async function copySaveCode() {
+      const box = document.getElementById('saveCodeInput');
+      if (!box.value.trim()) {
+        await exportSaveCode();
+      }
+      try {
+        await navigator.clipboard.writeText(box.value);
+        toast('セーブコードをコピーしました');
+      } catch (err) {
+        box.focus();
+        box.select();
+        toast('コードを選択しました。コピーしてください');
+      }
+    }
+
+    async function resetGame() {
+      if (!window.confirm('お世話の記録を最初からやり直しますか？')) return;
+      Object.assign(state, deepClone(defaultState));
+      Object.entries(animalDefs).forEach(([key, def]) => {
+        def.nickname = '';
+        def.stats = deepClone(defaultAnimalStats[key]);
+      });
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        LEGACY_STORAGE_KEYS.forEach(key => localStorage.removeItem(key));
+      } catch (err) {
+        console.warn('localStorage clear failed', err);
+      }
+      const db = await openSaveDb();
+      if (db) {
+        await new Promise(resolve => {
+          const tx = db.transaction(DB_STORE, 'readwrite');
+          tx.objectStore(DB_STORE).delete(DB_SLOT);
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => resolve(false);
+        });
+      }
+      state.logs = ['1日目・あさ｜ヒメハリテンレックとハリネズミが、ふかふかの寝床からそっと顔をのぞかせた。'];
+      const codeBox = document.getElementById('saveCodeInput');
+      if (codeBox) codeBox.value = '';
+      setVoiceNote('tenrec', 'まだ呼びかけていません。');
+      setVoiceNote('hedgehog', 'まだ呼びかけていません。');
+      switchTab('care', false);
+      renderAll();
+      await saveState(false, '自動保存');
+      setSaveStatus('リセットしました。新しいお世話の一日です。');
+      toast('最初からはじめました');
+    }
+
+    function addLog(text) {
+      const stamp = `${state.day}日目・${timeNames[state.timeIndex]}`;
+      state.logs.unshift(`${stamp}｜${text}`);
+      state.logs = state.logs.slice(0, 60);
+    }
+
+    function toast(text) {
+      const layer = document.getElementById('toastLayer');
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.textContent = text;
+      layer.appendChild(el);
+      setTimeout(() => el.remove(), 3200);
+    }
+
+    function moodText(stats, animalKey) {
+      const avg = averageStats(stats);
+      if (stats.hunger < 28) return 'おねだり';
+      if (stats.clean < 28) return 'むずむず';
+      if (stats.fun < 28) return 'しょんぼり';
+      if (avg > 84) return animalKey === 'hedgehog' ? 'るんるん' : 'わくわく';
+      if (avg > 68) return animalKey === 'hedgehog' ? 'おだやか' : 'ごきげん';
+      return 'ちょっぴり不満';
+    }
+
+    function updateRoomMood() {
+      const combined = [...Object.values(animalDefs.tenrec.stats), ...Object.values(animalDefs.hedgehog.stats)];
+      const avg = combined.reduce((a, b) => a + b, 0) / combined.length;
+      if (avg > 84) state.roomMood = 'きらきら';
+      else if (avg > 68) state.roomMood = 'のどか';
+      else if (avg > 45) state.roomMood = 'そわそわ';
+      else state.roomMood = 'おてつだい待ち';
+    }
+
+    function barClass(value) {
+      if (value >= 72) return 'bar-fill good';
+      if (value < 35) return 'bar-fill low';
+      return 'bar-fill';
+    }
+
+    function updateAnimalVisual(animalKey) {
+      const def = animalDefs[animalKey];
+      const svg = document.getElementById(def.svgId);
+      const stats = def.stats;
+      const isNight = timeNames[state.timeIndex] === 'よる';
+      svg.classList.toggle('sleepy', !isNight && stats.fun < 58);
+      svg.classList.toggle('dirty', stats.clean < 35);
+      svg.classList.toggle('happy', stats.fun > 72 && stats.hunger > 45);
+      svg.classList.toggle('active', isNight && stats.fun > 60 && stats.hunger > 38);
+      svg.classList.toggle('calm', !(isNight && stats.fun > 60 && stats.hunger > 38));
+
+      const habitat = document.getElementById(def.habitatId);
+      const floating = habitat.querySelector('.floating');
+      if (!floating) return;
+      if (animalKey === 'tenrec') {
+        floating.textContent = stats.clean < 40 ? '🪹' : (stats.fun > 74 ? (isNight ? '🌙' : '🌼') : '🌿');
+      } else {
+        floating.textContent = stats.clean < 40 ? '🍂' : (stats.fun > 74 ? (isNight ? '✨' : '⭐') : '⭐');
+      }
+    }
+
+    function renderBars(animalKey) {
+      const def = animalDefs[animalKey];
+      const root = document.getElementById(def.barsId);
+      root.innerHTML = '';
+      statKeys.forEach(key => {
+        const row = document.createElement('div');
+        row.className = 'bar-row';
+        row.innerHTML = `
+          <div>${def.labels[key]}</div>
+          <div class="bar-shell"><div class="${barClass(def.stats[key])}" style="width:${def.stats[key]}%"></div></div>
+          <div>${def.stats[key]}</div>
+        `;
+        root.appendChild(row);
+      });
+      document.getElementById(def.moodChipId).textContent = moodText(def.stats, animalKey);
+      updateAnimalVisual(animalKey);
+    }
+
+    function renderNames() {
+      Object.entries(animalDefs).forEach(([key, def]) => {
+        document.getElementById(def.titleId).textContent = displayName(key);
+        const input = document.getElementById(def.inputId);
+        if (document.activeElement !== input) input.value = def.nickname;
+      });
+    }
+
+    function baseVoiceLine(animalKey, phase) {
+      const name = displayName(animalKey);
+      const pools = {
+        tenrec: {
+          あさ: [
+            `「${name}、おかえり。朝のひとくち、どうぞ」`,
+            `「${name}、もうねんねの時間だよ。寝床をふかふかにしたよ」`,
+            `「${name}、今日もえらいね。ゆっくり休もう」`
+          ],
+          ひる: [
+            `「${name}、だいじょうぶ。静かにしておくね」`,
+            `「${name}、おやすみ。そっと見守ってるよ」`,
+            `「${name}、ふかふかにしたよ。安心して眠ってね」`
+          ],
+          よる: [
+            `「${name}、こんばんは。今夜もいっしょに遊ぼうか」`,
+            `「${name}、ごはんの時間だよ。いい匂い、するでしょ？」`,
+            `「${name}、ぽかぽかで元気に動こうね」`
+          ]
+        },
+        hedgehog: {
+          あさ: [
+            `「${name}、おつかれさま。おやすみ前のお水だよ」`,
+            `「${name}、巣箱にもどろっか。ふかふかにしてあるよ」`,
+            `「${name}、今日もいっぱいがんばったね」`
+          ],
+          ひる: [
+            `「${name}、しーっ。今日はここで丸くなっててね」`,
+            `「${name}、寝床きれいにしたよ。安心して眠ってね」`,
+            `「${name}、おひるは静かに。ゆっくりおやすみ」`
+          ],
+          よる: [
+            `「${name}、こんばんは。トンネルで遊ぶ？」`,
+            `「${name}、夜のごはんだよ。いい音でカリカリしよう」`,
+            `「${name}、くるくる運動、今日は何周いけるかな」`
+          ]
+        }
+      };
+      const options = pools[animalKey][phase];
+      return options[Math.floor(Math.random() * options.length)];
+    }
+
+    function setVoiceNote(animalKey, text) {
+      state.voiceNotes[animalKey] = text;
+      const el = document.getElementById(`${animalKey}VoiceNote`);
+      if (el) {
+        el.innerHTML = `<strong>こえ</strong><span>${text}</span>`;
+      }
+    }
+
+    function renderVoiceNotes() {
+      ['tenrec', 'hedgehog'].forEach(key => {
+        setVoiceNote(key, state.voiceNotes[key] || 'まだ呼びかけていません。');
+      });
+    }
+
+    function getActionConfig(animalKey, action) {
+      const phase = timeNames[state.timeIndex];
+      const isTenrec = animalKey === 'tenrec';
+      const label = phaseActionLabels[phase][animalKey][action] || actionNames[action];
+      const name = displayName(animalKey);
+      const config = { allowed: true, label, delta: {}, text: '', voice: '', unavailable: '' };
+
+      if (action === 'call') {
+        config.delta = phase === 'よる' ? { fun: 10 } : (phase === 'ひる' ? { fun: 5 } : { fun: 7 });
+        config.voice = baseVoiceLine(animalKey, phase);
+        config.text = phase === 'ひる'
+          ? `${name}の眠りをじゃましないように、そっと名前を呼んだ。`
+          : `${name}に名前を呼びかけると、ちいさく反応してくれた。`;
+        return config;
+      }
+
+      if (action === 'feed') {
+        if (phase === 'ひる') {
+          config.allowed = false;
+          config.unavailable = `${name}は昼にぐっすり眠る子です。ごはんは朝か夜にしましょう。`;
+          return config;
+        }
+        if (phase === 'あさ') {
+          config.delta = isTenrec ? { hunger: 20, fun: 5, clean: -2 } : { hunger: 18, fun: 5, clean: -2 };
+          config.text = isTenrec
+            ? `${name}が朝のひとくちをもぐもぐ。細い鼻先をぴくりと動かして、満足そうに巣箱へ向かった。`
+            : `${name}が朝のしめごはんをかりっと食べて、丸い背中をふっとゆるめた。`;
+        } else {
+          config.delta = isTenrec ? { hunger: 28, fun: 7, clean: -4 } : { hunger: 26, fun: 7, clean: -4 };
+          config.text = isTenrec
+            ? `${name}が夜の虫ミックスを勢いよく食べた。耳までうれしそうにぴんとする。`
+            : `${name}が夜のメインごはんをかりかり。小皿の音まで楽しそう。`;
+        }
+        return config;
+      }
+
+      if (action === 'water') {
+        if (phase === 'あさ') {
+          config.delta = { clean: 6, fun: 4 };
+          config.text = `${name}の朝のお水を新しくした。口もとがすっきりして、気分まで少し軽くなったみたい。`;
+        } else if (phase === 'ひる') {
+          config.delta = { clean: 7, fun: 3 };
+          config.text = `${name}を起こさないように、お水だけそっと替えた。お皿が静かに涼しく光った。`;
+        } else {
+          config.delta = { clean: 5, fun: 5 };
+          config.text = `${name}が活動前のお水をぴちゃり。夜の支度が整ってきた。`;
+        }
+        return config;
+      }
+
+      if (action === 'clean') {
+        if (phase === 'あさ') {
+          config.delta = { clean: 22, fun: 4 };
+          config.text = `${name}の寝床を朝のうちに整えた。藁の匂いがやさしくふくらんだ。`;
+        } else if (phase === 'ひる') {
+          config.delta = { clean: 26, fun: 3 };
+          config.text = `${name}を起こさないように、寝床をそっと交換した。眠りのかたちが崩れないくらい静か。`;
+        } else {
+          config.delta = { clean: 18, fun: 4 };
+          config.text = `${name}が動きやすいように、夜向けに床を整えた。足音が軽くなりそう。`;
+        }
+        return config;
+      }
+
+      if (action === 'play') {
+        if (phase !== 'よる') {
+          config.allowed = false;
+          config.unavailable = `${name}が遊びたくなるのは夜です。${phase}は静かに休ませてあげましょう。`;
+          return config;
+        }
+        config.delta = isTenrec ? { fun: 20, hunger: -4, clean: -2 } : { fun: 22, hunger: -5, clean: -3 };
+        config.text = isTenrec
+          ? `${name}がひらひら布を追いかけて、すっと細い鼻先を上げた。`
+          : `${name}がトンネルをくぐって戻ってきた。丸い背中がうれしそうに弾む。`;
+        return config;
+      }
+
+      if (action === 'rest') {
+        if (phase === 'あさ') {
+          config.delta = { fun: 6, clean: 2 };
+          config.text = `${name}が朝の休憩へ。巣箱の中で寝息がふわりと落ち着いた。`;
+        } else if (phase === 'ひる') {
+          config.delta = { fun: 8, clean: 3 };
+          config.text = `${name}が昼の深い眠りへ沈んでいく。寝床のやわらかさがよく似合う。`;
+        } else {
+          config.delta = { fun: 4, hunger: -1 };
+          config.text = `${name}が夜の合間に少しだけ休んだ。次のひと走りに備えているみたい。`;
+        }
+        return config;
+      }
+
+      if (action === 'special') {
+        if (isTenrec) {
+          if (phase === 'あさ') {
+            config.delta = { fun: 8, clean: 4 };
+            config.text = `${name}の保温布を朝のあいだに整えた。大きめの耳までほっとしたみたい。`;
+          } else if (phase === 'ひる') {
+            config.delta = { fun: 7, clean: 5 };
+            config.text = `${name}が眠るあいだに、保温布をそっと掛けなおした。ぬくもりが静かに満ちる。`;
+          } else {
+            config.delta = { fun: 11, hunger: -2, clean: 2 };
+            config.text = `${name}をぽかぽかに整えると、夜の冒険に向けてうれしそうに鼻先を上げた。`;
+          }
+        } else {
+          if (phase === 'あさ') {
+            config.delta = { fun: 6, clean: 4 };
+            config.text = `${name}が巣箱にもどる道を見守った。安心したように、ころんと丸くなる。`;
+          } else if (phase === 'ひる') {
+            config.delta = { fun: 4, clean: 3 };
+            config.text = `${name}は昼のあいだ、静かに落ち着ける寝床でのんびり。夜に向けて機嫌をたくわえた。`;
+          } else {
+            config.delta = { fun: 16, hunger: -4, clean: -2 };
+            config.text = `${name}がくるくる運動で元気いっぱい。夜のごきげんがぐんと上がった。`;
+          }
+        }
+        return config;
+      }
+
+      return config;
+    }
+
+    function phaseAnimalTip(animalKey) {
+      const phase = timeNames[state.timeIndex];
+      const name = displayName(animalKey);
+      if (animalKey === 'tenrec') {
+        if (phase === 'あさ') return `${name}は夜あけの落ち着く時間。軽いごはんと保温まわりの見直しがしやすいです。`;
+        if (phase === 'ひる') return `${name}は昼に冷えすぎないよう、静かなおそうじや保温布の調整が向いています。`;
+        return `${name}は夜にしっかり食べて動きたい気分。ごはん、遊び、ぽかぽかケアがぴったりです。`;
+      }
+      if (phase === 'あさ') return `${name}は朝に巣箱へもどる支度。お水や寝床の整えで、きれいに眠りへ入れます。`;
+      if (phase === 'ひる') return `${name}は昼はとにかく静けさ重視。お水と寝床の確認、ひそやかな声かけが向いています。`;
+      return `${name}は夜が本番。ごはん、トンネル遊び、くるくる運動でごきげんが上がります。`;
+    }
+
+    function getAllowedFlags(animalKey, action) {
+      return timeNames.map((_, i) => {
+        const originalIndex = state.timeIndex;
+        state.timeIndex = i;
+        const allowed = getActionConfig(animalKey, action).allowed;
+        state.timeIndex = originalIndex;
+        return allowed;
+      });
+    }
+
+    function allowedTimeText(animalKey, action) {
+      const flags = getAllowedFlags(animalKey, action);
+      const allowed = timeNames.filter((_, i) => flags[i]);
+      return allowed.join('・');
+    }
+
+    function isActionAvailable(animalKey, action) {
+      return getActionConfig(animalKey, action).allowed;
+    }
+
+    function progressText(animalKey) {
+      return state.careProgress[animalKey] ? '済' : '未';
+    }
+
+    function canUseGroupAction() {
+      return !state.careProgress.tenrec && !state.careProgress.hedgehog;
+    }
+
+    function remainingAnimalKeys() {
+      return Object.keys(state.careProgress).filter(key => !state.careProgress[key]);
+    }
+
+    function renderActionStates(animalKey) {
+      const def = animalDefs[animalKey];
+      const card = document.querySelector(`.animal-card[data-animal="${animalKey}"]`);
+      const buttons = card.querySelectorAll('.act');
+      const availableActions = [];
+      const alreadyDone = !!state.careProgress[animalKey];
+
+      buttons.forEach(btn => {
+        const action = btn.dataset.action;
+        const config = getActionConfig(animalKey, action);
+        btn.classList.toggle('locked', !config.allowed || alreadyDone);
+        btn.classList.toggle('done', alreadyDone);
+        btn.dataset.allowed = config.allowed ? '1' : '0';
+        const small = btn.querySelector('small');
+        if (alreadyDone) {
+          small.textContent = 'この時間はお世話ずみ';
+        } else {
+          small.textContent = config.allowed ? config.label : `${allowedTimeText(animalKey, action)}にできる`;
+        }
+        if (config.allowed) availableActions.push(actionNames[action]);
+      });
+
+      const phase = timeNames[state.timeIndex];
+      const lead = phase === 'よる' ? '元気な時間です。' : (phase === 'ひる' ? '眠たい時間です。' : '寝床にもどる時間です。');
+      const progress = alreadyDone ? 'この時間のお世話は完了しました。' : `いまは ${availableActions.join('・')} ができます。`;
+      document.getElementById(def.noteId).textContent = `${lead} ${phaseAnimalTip(animalKey)} ${progress}`;
+    }
+
+    function renderGroupActions() {
+      const locked = !canUseGroupAction();
+      ['bothFeed', 'bothRest', 'refreshRoom'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        btn.classList.toggle('locked', locked);
+      });
+    }
+
+    function renderTop() {
+      document.getElementById('dayCount').textContent = `${state.day}日目`;
+      document.getElementById('clockText').textContent = `${timeNames[state.timeIndex]}`;
+      document.getElementById('starCount').textContent = `${state.stars} ★`;
+      document.getElementById('roomMood').textContent = state.roomMood;
+      document.body.classList.toggle('night', timeNames[state.timeIndex] === 'よる');
+    }
+
+    function renderLogs() {
+      const list = document.getElementById('logList');
+      list.innerHTML = '';
+      state.logs.forEach(text => {
+        const item = document.createElement('div');
+        item.className = 'log-item';
+        item.textContent = text;
+        list.appendChild(item);
+      });
+
+      const summary = document.getElementById('diarySummary');
+      summary.innerHTML = `
+        ${namedSpecies('tenrec')} と ${namedSpecies('hedgehog')} の ${state.day}日目。<br>
+        いまは <strong>${timeNames[state.timeIndex]}</strong>、なかよしスターは <strong>${state.stars} ★</strong>、おへやの空気は <strong>${state.roomMood}</strong> です。
+      `;
+    }
+
+    function availableActionText(animalKey) {
+      return Object.keys(actionNames)
+        .filter(action => isActionAvailable(animalKey, action))
+        .map(action => actionNames[action])
+        .join('・');
+    }
+
+    function renderPhasePanel() {
+      const phase = timeNames[state.timeIndex];
+      document.getElementById('phaseDescription').textContent = phaseDescriptions[phase];
+      document.getElementById('phaseSummary').innerHTML = `
+        <strong>${phase}</strong>のこまかいお世話メモ<br>
+        ・進み方：ヒメハリ ${progressText('tenrec')} / ハリネズミ ${progressText('hedgehog')}。個別ならふたりぶんそろうと次の時間へ、まとめてお世話は1回で次へ。<br>
+        ・${namedSpecies('tenrec')}：${availableActionText('tenrec')}<br>
+        <span style="opacity:0.88;">→ ${phaseAnimalTip('tenrec')}</span><br>
+        ・${namedSpecies('hedgehog')}：${availableActionText('hedgehog')}<br>
+        <span style="opacity:0.88;">→ ${phaseAnimalTip('hedgehog')}</span>
+      `;
+    }
+
+    function renderTabs() {
+      document.querySelectorAll('.main-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === state.activeTab);
+      });
+      document.querySelectorAll('.tab-page').forEach(page => {
+        page.classList.toggle('active', page.dataset.tabPage === state.activeTab);
+      });
+    }
+
+    function renderAll() {
+      updateRoomMood();
+      renderTop();
+      renderNames();
+      renderVoiceNotes();
+      renderBars('tenrec');
+      renderBars('hedgehog');
+      renderActionStates('tenrec');
+      renderActionStates('hedgehog');
+      renderGroupActions();
+      renderPhasePanel();
+      renderLogs();
+      renderTabs();
+      if (state.lastSavedText) document.getElementById('saveStatus').textContent = state.lastSavedText;
+    }
+
+    function gainStars(amount, why, showToast = true) {
+      state.stars += amount;
+      if (showToast) toast(`★ ${amount} ふえた｜${why}`);
+    }
+
+    function evaluateBonus(animalKey) {
+      const stats = animalDefs[animalKey].stats;
+      const avg = averageStats(stats);
+      if (avg >= 88) gainStars(2, `${displayName(animalKey)}がとても満足してる`, false);
+      else if (avg >= 75) gainStars(1, `${displayName(animalKey)}が落ち着いてる`, false);
+    }
+
+    function unavailableMessage(animalKey, action) {
+      const config = getActionConfig(animalKey, action);
+      if (config.unavailable) return config.unavailable;
+      const when = allowedTimeText(animalKey, action);
+      return `${timeNames[state.timeIndex]}は${displayName(animalKey)}を静かにさせたい時間です。${actionNames[action]}は${when}にしましょう。`;
+    }
+
+    function decayStatsForPhase(phase) {
+      Object.entries(animalDefs).forEach(([animalKey, def]) => {
+        const s = def.stats;
+        if (phase === 'あさ') {
+          s.hunger = clamp(s.hunger - 4);
+          s.fun = clamp(s.fun - 2);
+          s.clean = clamp(s.clean - 3);
+        } else if (phase === 'ひる') {
+          s.hunger = clamp(s.hunger - 5);
+          s.fun = clamp(s.fun - 1);
+          s.clean = clamp(s.clean - 2);
+        } else {
+          s.hunger = clamp(s.hunger - (animalKey === 'tenrec' ? 7 : 6));
+          s.fun = clamp(s.fun - 4);
+          s.clean = clamp(s.clean - 5);
+        }
+        if (s.hunger < 25 || s.clean < 25) s.fun = clamp(s.fun - 4);
+      });
+    }
+
+    function maybeRandomEvent() {
+      const roll = Math.random();
+      const phase = timeNames[state.timeIndex];
+      if (roll < 0.18 && phase === 'よる') {
+        animalDefs.tenrec.stats.fun = clamp(animalDefs.tenrec.stats.fun + 6);
+        addLog(`${displayName('tenrec')}がくんくんと空気をかいで、うれしそうに巣箱のまわりを歩いた。`);
+      } else if (roll < 0.34) {
+        animalDefs.hedgehog.stats.clean = clamp(animalDefs.hedgehog.stats.clean - 6);
+        addLog(`${displayName('hedgehog')}が床材をちょっと散らかした。おそうじすると気持ちよさそう。`);
+      } else if (roll < 0.48) {
+        animalDefs.hedgehog.stats.fun = clamp(animalDefs.hedgehog.stats.fun + 5);
+        animalDefs.tenrec.stats.fun = clamp(animalDefs.tenrec.stats.fun + 4);
+        gainStars(1, 'おへやの空気がちょうどいい', false);
+        addLog('おへやの空気がふんわり整って、ふたりとも少し安心したみたい。');
+      }
+    }
+
+    async function advanceTime(noteText = '') {
+      const currentPhase = timeNames[state.timeIndex];
+      decayStatsForPhase(currentPhase);
+
+      if (noteText) addLog(noteText);
+
+      state.timeIndex += 1;
+      if (state.timeIndex >= timeNames.length) {
+        state.timeIndex = 0;
+        state.day += 1;
+        gainStars(3, '新しい一日が始まった', false);
+      }
+
+      state.careProgress.tenrec = false;
+      state.careProgress.hedgehog = false;
+      addLog(phaseLogs[timeNames[state.timeIndex]]);
+      maybeRandomEvent();
+      renderAll();
+      await saveState(false, '自動保存');
+    }
+
+    async function applyAction(animalKey, action, silent = false) {
+      if (state.careProgress[animalKey]) {
+        const other = remainingAnimalKeys().map(displayName)[0];
+        toast(other
+          ? `${displayName(animalKey)}はこの時間でもうお世話ずみです。${other}をお世話すると次の時間になります。`
+          : `${displayName(animalKey)}はこの時間でもうお世話ずみです。`);
+        return false;
+      }
+
+      const config = getActionConfig(animalKey, action);
+      if (!config.allowed) {
+        toast(unavailableMessage(animalKey, action));
+        return false;
+      }
+
+      applyDelta(animalDefs[animalKey].stats, config.delta);
+      if (config.voice) setVoiceNote(animalKey, config.voice);
+      evaluateBonus(animalKey);
+      state.careProgress[animalKey] = true;
+      if (!silent) addLog(config.text);
+
+      const remains = remainingAnimalKeys();
+      if (!remains.length) {
+        renderAll();
+        toast('ふたりのお世話がそろったので、次の時間へ進みます');
+        await advanceTime('ふたりのお世話がそろい、時間がすすんだ。');
+      } else {
+        renderAll();
+        await saveState(false, '自動保存');
+        toast(`${displayName(remains[0])} をお世話すると次の時間へ進みます`);
+      }
+      return true;
+    }
+
+    async function runGroupAction(kind) {
+      if (!canUseGroupAction()) {
+        toast('この時間はもう個別お世話を始めています。まとめてお世話は次の時間からにしましょう。');
+        return;
+      }
+
+      if (kind === 'feed') {
+        if (!isActionAvailable('tenrec', 'feed') || !isActionAvailable('hedgehog', 'feed')) {
+          toast('いまはまとめてごはんの時間ではありません。朝か夜にしましょう。');
+          return;
+        }
+        ['tenrec', 'hedgehog'].forEach(key => {
+          applyDelta(animalDefs[key].stats, getActionConfig(key, 'feed').delta);
+          evaluateBonus(key);
+        });
+        addLog(`${displayName('tenrec')}と${displayName('hedgehog')}にごはんをあげた。小皿がからんと鳴って、うれしい空気が広がった。`);
+        renderAll();
+        toast('まとめてごはんをあげたので、次の時間へ進みます');
+        await advanceTime('まとめてごはんをあげたので、時間がすすんだ。');
+        return;
+      }
+
+      if (kind === 'rest') {
+        ['tenrec', 'hedgehog'].forEach(key => {
+          applyDelta(animalDefs[key].stats, getActionConfig(key, 'rest').delta);
+          evaluateBonus(key);
+        });
+        addLog('ふたりとも落ち着いて休憩。寝床がふわりと静かになった。');
+        renderAll();
+        toast('まとめて休ませたので、次の時間へ進みます');
+        await advanceTime('ふたりをまとめて休ませたので、時間がすすんだ。');
+        return;
+      }
+
+      if (kind === 'room') {
+        ['tenrec', 'hedgehog'].forEach(key => {
+          animalDefs[key].stats.clean = clamp(animalDefs[key].stats.clean + 18);
+          animalDefs[key].stats.fun = clamp(animalDefs[key].stats.fun + 6);
+          evaluateBonus(key);
+        });
+        gainStars(2, 'おへやがととのった', false);
+        addLog('おへや全体を整えたら、巣箱も水皿もやわらかな光を返した。');
+        renderAll();
+        toast('おへやをまとめて整えたので、次の時間へ進みます');
+        await advanceTime('おへやをまとめて整えたので、時間がすすんだ。');
+      }
+    }
+
+    function switchTab(tab, doSave = true) {
+      state.activeTab = tab;
+      renderTabs();
+      if (doSave) saveState(false, '自動保存');
+    }
+
+    function bindActions() {
+      document.querySelectorAll('.act').forEach(btn => {
+        btn.addEventListener('click', () => {
+          applyAction(btn.dataset.target, btn.dataset.action);
+        });
+      });
+
+      document.getElementById('bothFeed').addEventListener('click', () => runGroupAction('feed'));
+      document.getElementById('bothRest').addEventListener('click', () => runGroupAction('rest'));
+      document.getElementById('refreshRoom').addEventListener('click', () => runGroupAction('room'));
+
+      document.getElementById('saveBtn').addEventListener('click', () => saveState(true, '手動保存'));
+      document.getElementById('loadBtn').addEventListener('click', () => loadState(true));
+      document.getElementById('exportCodeBtn').addEventListener('click', exportSaveCode);
+      document.getElementById('importCodeBtn').addEventListener('click', importSaveCode);
+      document.getElementById('copyCodeBtn').addEventListener('click', copySaveCode);
+      document.getElementById('resetBtn').addEventListener('click', resetGame);
+
+      document.querySelectorAll('.main-tab').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+
+      Object.entries(animalDefs).forEach(([key, def]) => {
+        const input = document.getElementById(def.inputId);
+        input.addEventListener('input', () => {
+          def.nickname = input.value.slice(0, 12);
+          renderNames();
+          saveState(false, '自動保存');
+        });
+        input.addEventListener('change', () => {
+          const finalName = displayName(key);
+          setVoiceNote(key, `「${finalName}」って呼ぶね。これからよろしく。`);
+          addLog(`${finalName}の名札を整えた。呼びかけるたび、少し親しくなれた気がする。`);
+          renderAll();
+          saveState(false, '自動保存');
+        });
+      });
+    }
+
+    async function init() {
+      bindActions();
+      const loaded = await loadState(false);
+      if (!loaded) {
+        state.logs = ['1日目・あさ｜ヒメハリテンレックとハリネズミが、ふかふかの寝床からそっと顔をのぞかせた。'];
+        setSaveStatus('自動保存は localStorage と IndexedDB に入ります。保険としてセーブコードも使えます。');
+        renderAll();
+        await saveState(false, '自動保存');
+      } else {
+        renderAll();
+      }
+    }
+
+    init();
+  </script>
+
+</body>
+</html>

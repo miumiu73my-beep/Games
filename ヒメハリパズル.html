@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ヒメハリ・ミルワームクエスト Perfect</title>
+    <style>
+        body { font-family: 'Hiragino Sans', sans-serif; text-align: center; background: #fdf5e6; margin: 0; padding: 10px; touch-action: manipulation; }
+        h1 { font-size: 1.1rem; color: #8b4513; margin: 5px; }
+        #game-container { display: inline-block; background: #fff; padding: 5px; border: 4px solid #8b4513; border-radius: 10px; }
+        #grid { display: grid; grid-template-columns: repeat(4, 70px); grid-template-rows: repeat(4, 70px); }
+        .cell { width: 70px; height: 70px; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-size: 30px; position: relative; }
+        .ui-row { margin: 10px 0; display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; }
+        .char-btn { padding: 8px 12px; cursor: pointer; border-radius: 15px; border: 2px solid #8b4513; font-weight: bold; background: #fff; }
+        .char-btn.active { background: #ffcc00; border-color: #f39c12; }
+        .reset-btn { font-size: 24px; background: none; border: none; cursor: pointer; }
+        #message-box { margin: 10px auto; width: 280px; padding: 10px; border-radius: 10px; background: white; min-height: 80px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 0.85rem; display: flex; flex-direction: column; justify-content: center; }
+        .controls { display: grid; grid-template-areas: ". up ." "left . right" ". down ."; gap: 8px; justify-content: center; }
+        .btn-ctrl { width: 55px; height: 55px; background: #8b4513; color: white; border: none; border-radius: 50%; font-size: 20px; box-shadow: 0 4px #5d2e0d; }
+    </style>
+</head>
+<body>
+
+    <h1>🦔 ミルワーム・クエスト</h1>
+
+    <div class="ui-row">
+        <button id="btn-okoge" class="char-btn active" onclick="selectChar('okoge')">おこげ丸</button>
+        <button id="btn-bonjiri" class="char-btn" onclick="selectChar('bonjiri')">ぼんじり丸</button>
+        <button id="btn-shiokara" class="char-btn" onclick="selectChar('shiokara')">しおから丸</button>
+        <button class="reset-btn" onclick="initGame()" title="配置をやり直す">🔔</button>
+    </div>
+
+    <div id="game-container"><div id="grid"></div></div>
+
+    <div id="message-box">
+        <p id="speech" style="margin:2px 0;">お世話係さん、キャラを選んでね！</p>
+        <small id="pose" style="color:#666;"></small>
+    </div>
+
+    <div class="controls">
+        <button class="btn-ctrl" style="grid-area:up" onclick="handleMove(0, -1)">↑</button>
+        <button class="btn-ctrl" style="grid-area:left" onclick="handleMove(-1, 0)">←</button>
+        <button class="btn-ctrl" style="grid-area:right" onclick="handleMove(1, 0)">→</button>
+        <button class="btn-ctrl" style="grid-area:down" onclick="handleMove(0, 1)">↓</button>
+    </div>
+
+<script>
+const speechElement = document.getElementById('speech');
+const poseElement = document.getElementById('pose');
+const gridElement = document.getElementById('grid');
+
+const boardSize = 4;
+let playerPos = { x: 0, y: 0 };
+let goalPos = { x: 3, y: 3 };
+let traps = [];
+let selectedChar = 'okoge';
+let isFirstSelect = true;
+
+const chars = {
+    okoge: { 
+        name: "おこげ丸", icon: "🦔", 
+        msg: "フゴフゴ！おいしいのだいすき！もっとちょーだい！", 
+        pose: "(目を輝かせて、鼻をひくひくさせてるよ)",
+        switch: "「おこげ丸、ねむたくなっちゃったのぉ…。あとはおねがいだじょ。」",
+        hello: "「おこげ丸、がんばるじょ！ミルワームさん、どこかなぁ？」"
+    },
+    bonjiri: { 
+        name: "ぼんじり丸", icon: "🏰", 
+        msg: "「朝食の儀」は大成功である。給仕係、褒めてつかわすぞ。", 
+        pose: "(気高く鼻を鳴らしている)",
+        switch: "「ふむ、これ以上の深追いは無用。貴殿に現場の管理を委任する。」",
+        hello: "「吾輩の出番か。よかろう、この地の治安を検分して進むとしよう。」"
+    },
+    shiokara: { 
+        name: "しおから丸", icon: "⚡", 
+        msg: "待ってましたー！先輩、見ました！？僕の華麗なステップ！", 
+        pose: "(全力で尻尾を振る勢いで喜んでいる)",
+        switch: "「わあぁ！バトンタッチですね！先輩、あとよろしくお願いしまーーす！」",
+        hello: "「僕に行かせてください！最短ルートでミルワームまで爆走しますよー！」"
+    }
+};
+
+function selectChar(newChar) {
+    if (selectedChar === newChar && !isFirstSelect) return;
+
+    if (isFirstSelect) {
+        displayDialogue(chars[newChar].hello, `(${chars[newChar].name}がやる気満々だじょ！)`);
+        isFirstSelect = false;
+    } else {
+        displayDialogue(chars[selectedChar].switch, `(${chars[selectedChar].name}が交代したよ)`);
+        setTimeout(() => {
+            displayDialogue(chars[newChar].hello, `(${chars[newChar].name}の出番だ！)`);
+        }, 1200);
+    }
+
+    selectedChar = newChar;
+    document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-' + newChar).classList.add('active');
+    updateGrid();
+}
+
+function displayDialogue(text, poseText) {
+    speechElement.innerText = text;
+    poseElement.innerText = poseText;
+}
+
+function initGame() {
+    playerPos = { x: 0, y: 0 };
+    traps = [];
+    displayDialogue("ミルワームはどこかな？", "(配置が新しくなったよ)");
+    
+    const trapCount = 4;
+    while(traps.length < trapCount) {
+        let tx = Math.floor(Math.random() * boardSize);
+        let ty = Math.floor(Math.random() * boardSize);
+        if ((tx===0 && ty===0) || (tx===3 && ty===3)) continue;
+        if (traps.some(t => t.x === tx && t.y === ty)) continue;
+        traps.push({ x: tx, y: ty, type: Math.random() > 0.4 ? 'wall' : 'math' });
+    }
+    updateGrid();
+}
+
+function updateGrid() {
+    gridElement.innerHTML = '';
+    for (let y = 0; y < boardSize; y++) {
+        for (let x = 0; x < boardSize; x++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            const trap = traps.find(t => t.x === x && t.y === y);
+            if (x === playerPos.x && y === playerPos.y) cell.innerText = chars[selectedChar].icon;
+            else if (x === goalPos.x && y === goalPos.y) cell.innerText = "🐛";
+            else if (trap) cell.innerText = trap.type === 'wall' ? "📦" : "📝";
+            gridElement.appendChild(cell);
+        }
+    }
+}
+
+function handleMove(dx, dy) {
+    if (selectedChar === 'shiokara') {
+        displayDialogue("「わあぁ！止まらないですよー！一気に行きます！」", "(爆走中！)");
+        moveSingle(dx, dy);
+        setTimeout(() => { moveSingle(dx, dy); checkWin(); }, 120);
+    } else {
+        moveSingle(dx, dy);
+        checkWin();
+    }
+}
+
+function checkWin() {
+    if (playerPos.x === goalPos.x && playerPos.y === goalPos.y) {
+        displayDialogue(chars[selectedChar].msg, chars[selectedChar].pose);
+        setTimeout(() => { 
+            alert("クリア！次のステージへ！"); 
+            initGame(); 
+        }, 600);
+    }
+}
+
+function moveSingle(dx, dy) {
+    let nx = playerPos.x + dx;
+    let ny = playerPos.y + dy;
+    
+    if (nx < 0 || nx >= boardSize || ny < 0 || ny >= boardSize) return;
+
+    const trap = traps.find(t => t.x === nx && t.y === ny);
+
+    // キャラクターごとの特殊反応
+    if (selectedChar === 'bonjiri') {
+        if (trap && trap.type === 'wall') {
+            displayDialogue("「ふむ、この先は治安維持に問題があるな。検分終了である」", "(慎重に周囲の家具の匂いを嗅いでいる)");
+            return;
+        } else if (trap && trap.type === 'math') {
+            displayDialogue("「これしきの計算、容易いものである。吾輩を誰だと思っているのだ。」", "(フンと鼻を鳴らして優雅に通り過ぎた！)");
+        }
+    } else if (selectedChar === 'shiokara') {
+        if (trap && trap.type === 'math') {
+            displayDialogue("「何これ？これ美味しいのー！？とりあえず進んじゃえ！」", "(看板をペロペロしながら突進中！)");
+        }
+    } else if (selectedChar === 'okoge') {
+        if (trap && trap.type === 'math') {
+            displayDialogue("「おこげ丸、むじゅかしいことわかんないじょ…おなかすいたの。」", "(頭をかかえて、そのまま丸まっちゃったよ)");
+            return; 
+        }
+    }
+
+    // 共通の壁判定（家具は全員通れない）
+    if (trap && trap.type === 'wall') return;
+
+    playerPos.x = nx;
+    playerPos.y = ny;
+    updateGrid();
+}
+
+initGame();
+</script>
+</body>
+</html>
