@@ -20,6 +20,7 @@ main{width:min(720px,100%);margin:auto;padding:calc(26px + env(safe-area-inset-t
 .game:active{transform:scale(.985);background:#fff}.game:focus-visible{outline:3px solid #c86f95;outline-offset:3px}.emoji{width:52px;height:52px;display:grid;place-items:center;border-radius:16px;background:#fff1dc;font-size:30px;flex:none}.game-text{flex:1;min-width:0;display:grid;gap:4px}.game strong{font-size:16px;line-height:1.4}.game small{font-size:13px;color:#846e72}.arrow{font-size:29px;color:#bd7990}
 footer{font-size:13px;color:#75666a;line-height:1.7;padding:10px 3px}.status{font-size:12px;background:#fff9f5;border:1px solid #eeded6;border-radius:12px;padding:10px 12px}
 </style>
+<script src="./pwa-nav.js" defer></script>
 </head>
 <body><main><div class="badge">OFFLINE-FRIENDLY GAME COLLECTION</div><h1>ちいさなゲームの本棚 🎮</h1>
 <p>好きなゲームをタップして遊んでね。ホーム画面に追加すれば、アプリのように開けます。</p>
@@ -31,7 +32,10 @@ footer{font-size:13px;color:#75666a;line-height:1.7;padding:10px 3px}.status{fon
 <footer><p class="status" id="offline">初回はインターネット接続が必要です。読み込んだゲームはオフラインでも遊べるように保存されます。</p>
 <p>※ 各ゲームのセーブデータは使用端末・ブラウザ内に保存されます。Safariとホーム画面アプリでは保存領域が別になる場合があります。</p></footer>
 </main><script>
-if('serviceWorker' in navigator && location.protocol==='https:'){
- navigator.serviceWorker.register('./sw.js').then(()=>{document.getElementById('offline').textContent='オフライン対応の準備ができました。初回キャッシュの完了後にオフラインで遊べます。';}).catch(()=>{});
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.ready.then(() => {
+    const el = document.getElementById("offline");
+    if (el) el.textContent = "オフライン用の保存が完了しました。ゲームは通信がないときも開けます。";
+  }).catch(() => {});
 }
 </script></body></html>
