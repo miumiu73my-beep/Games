@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fff6ef">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Games">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+<title>Games | ちいさなゲームの本棚</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:#553e42;background:#fff6ef;color-scheme:light}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 95% 0%,#ffe1d8,transparent 40%),radial-gradient(circle at 0% 55%,#fff0bd,transparent 50%),#fff6ef;min-height:100dvh}
+main{width:min(720px,100%);margin:auto;padding:calc(26px + env(safe-area-inset-top)) 20px calc(30px + env(safe-area-inset-bottom))}
+.badge{font-size:13px;font-weight:750;color:#9a5470;letter-spacing:.07em}h1{font-size:clamp(26px,6vw,39px);margin:9px 0 8px}p{line-height:1.7;color:#79676a}nav{display:grid;gap:12px;margin:25px 0}
+.game{display:flex;align-items:center;gap:15px;padding:19px 16px;color:inherit;text-decoration:none;background:#ffffffdd;border:1px solid #efdfd8;border-radius:22px;box-shadow:0 8px 26px #9f65701a;transition:transform .12s,background .12s}
+.game:active{transform:scale(.985);background:#fff}.game:focus-visible{outline:3px solid #c86f95;outline-offset:3px}.emoji{width:52px;height:52px;display:grid;place-items:center;border-radius:16px;background:#fff1dc;font-size:30px;flex:none}.game-text{flex:1;min-width:0;display:grid;gap:4px}.game strong{font-size:16px;line-height:1.4}.game small{font-size:13px;color:#846e72}.arrow{font-size:29px;color:#bd7990}
+footer{font-size:13px;color:#75666a;line-height:1.7;padding:10px 3px}.status{font-size:12px;background:#fff9f5;border:1px solid #eeded6;border-radius:12px;padding:10px 12px}
+</style>
+</head>
+<body><main><div class="badge">OFFLINE-FRIENDLY GAME COLLECTION</div><h1>ちいさなゲームの本棚 🎮</h1>
+<p>好きなゲームをタップして遊んでね。ホーム画面に追加すれば、アプリのように開けます。</p>
+<nav aria-label="ゲーム一覧"><a class="game" href="%E3%82%AF%E3%82%99%E3%83%AB%E3%83%A1%E3%83%86%E3%83%B3%E3%83%AC%E3%83%83%E3%82%AF.html"><span class="emoji" aria-hidden="true">🍽️</span><span class="game-text"><strong>ごちそう待ちテンレック</strong><small>テンレックと食べ物のゲーム</small></span><span class="arrow" aria-hidden="true">›</span></a>
+<a class="game" href="%E3%83%8F%E3%83%AA%E3%83%8D%E3%82%B9%E3%82%99%E3%83%9F%E3%81%AE%E3%81%8A%E3%81%8B%E3%81%88%E3%82%8A%E3%83%8F%E3%82%9A%E3%83%88%E3%83%AD%E3%83%BC%E3%83%AB.html"><span class="emoji" aria-hidden="true">🦔</span><span class="game-text"><strong>ハリネズミのおかえりパトロール</strong><small>ハリネズミの見守りゲーム</small></span><span class="arrow" aria-hidden="true">›</span></a>
+<a class="game" href="%E3%83%92%E3%83%A1%E3%83%8F%E3%83%AA%E3%81%A8%E3%83%8F%E3%83%AA%E3%83%8D%E3%82%B9%E3%82%99%E3%83%9F%E3%81%AE%E3%81%8A%E3%81%9B%E3%82%8F%E3%81%88%E3%81%BB%E3%82%93.html"><span class="emoji" aria-hidden="true">📖</span><span class="game-text"><strong>ヒメハリとハリネズミのおせわえほん</strong><small>小さな動物たちのお世話</small></span><span class="arrow" aria-hidden="true">›</span></a>
+<a class="game" href="%E3%83%92%E3%83%A1%E3%83%8F%E3%83%AA%E3%83%8F%E3%82%9A%E3%82%B9%E3%82%99%E3%83%AB.html"><span class="emoji" aria-hidden="true">🧩</span><span class="game-text"><strong>ヒメハリ・ミルワームクエスト</strong><small>マス目を進むパズル</small></span><span class="arrow" aria-hidden="true">›</span></a>
+<a class="game" href="%E9%87%8E%E8%8F%9C%E7%95%91%E3%81%9F%E3%82%99%E3%81%91%E7%89%A7%E5%A0%B4.html"><span class="emoji" aria-hidden="true">🥬</span><span class="game-text"><strong>やさい畑だけ牧場</strong><small>野菜を育てる牧場ゲーム</small></span><span class="arrow" aria-hidden="true">›</span></a></nav>
+<footer><p class="status" id="offline">初回はインターネット接続が必要です。読み込んだゲームはオフラインでも遊べるように保存されます。</p>
+<p>※ 各ゲームのセーブデータは使用端末・ブラウザ内に保存されます。Safariとホーム画面アプリでは保存領域が別になる場合があります。</p></footer>
+</main><script>
+if('serviceWorker' in navigator && location.protocol==='https:'){
+ navigator.serviceWorker.register('./sw.js').then(()=>{document.getElementById('offline').textContent='オフライン対応の準備ができました。初回キャッシュの完了後にオフラインで遊べます。';}).catch(()=>{});
+}
+</script></body></html>
